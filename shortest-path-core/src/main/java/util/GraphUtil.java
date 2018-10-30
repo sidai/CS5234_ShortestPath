@@ -60,7 +60,7 @@ public class GraphUtil {
         AllEdgesIterator iter = graph.getAllEdges();
 
         while(iter.next()) {
-            edgeUtil.addEdge(iter.getEdge(), iter.getBaseNode(), iter.getAdjNode(), iter.getDistance(), iter.getName());
+            edgeUtil.addEdge(iter.getBaseNode(), iter.getAdjNode(), iter.getDistance());
         }
         System.out.println("Edge: " + iter.length() + ", " + edgeUtil.getEdgeSize());
     }

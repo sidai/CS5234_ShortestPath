@@ -63,10 +63,6 @@ public class NodeUtil {
     public void loadFromCSV(String storagePath) throws IOException {
 
         Path pathToFile = Paths.get(storagePath);
-        if(!Files.exists(pathToFile)) {
-            Files.createDirectories(pathToFile.getParent());
-            Files.createFile(pathToFile);
-        }
 
         try (Reader reader = Files.newBufferedReader(pathToFile)) {
             CsvToBean<Node> csvToBean = new CsvToBeanBuilder(reader)
