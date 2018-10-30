@@ -1,0 +1,9 @@
+target/
+map-data/
+*pbf
+.idea/
+*iml
+.settings/
+.classpath
+.project
+*.pdf
