@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class EdgeUtil {
@@ -27,14 +28,13 @@ public class EdgeUtil {
         edgeList.add(edge);
     }
 
-    public void addEdge(int edgeId, int fromNode, int toNode) {
-        addEdge(new Edge(edgeId, fromNode, toNode));
+    public void addEdge(int fromNode, int toNode, double distance) {
+        addEdge(new Edge(fromNode, toNode, distance));
     }
 
-    public void addEdge(int edgeId, int fromNode, int toNode, double distance, String name) {
-        addEdge(new Edge(edgeId, fromNode, toNode, distance, name));
+    public void sort() {
+        edgeList.sort(Comparator.comparingInt(Edge::getFromNode));
     }
-
 
     public int getEdgeSize() {
         return edgeList.size();
@@ -64,13 +64,9 @@ public class EdgeUtil {
         }
     }
 
-    public void loadFromCSV(String storagePath) throws IOException {
+    public List<Edge> loadFromCSV(String storagePath) throws IOException {
 
         Path pathToFile = Paths.get(storagePath);
-        if(!Files.exists(pathToFile)) {
-            Files.createDirectories(pathToFile.getParent());
-            Files.createFile(pathToFile);
-        }
 
         try (Reader reader = Files.newBufferedReader(pathToFile)) {
             CsvToBean<Edge> csvToBean = new CsvToBeanBuilder(reader)
@@ -78,7 +74,8 @@ public class EdgeUtil {
                     .withIgnoreLeadingWhiteSpace(true)
                     .build();
 
-            edgeList = csvToBean.parse();
+            List<Edge> edgeList = csvToBean.parse();
+            return edgeList;
         } catch (Exception ex) {
             throw ex;
         }
