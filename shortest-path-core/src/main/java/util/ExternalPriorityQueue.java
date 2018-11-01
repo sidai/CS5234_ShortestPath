@@ -139,10 +139,16 @@ public class ExternalPriorityQueue {
         child.setPqIndex(parentPQIndex);
         parent.setPqIndex(childPQIndex);
 
-
-        updateToFile(parent);
-        updateToFile(child);
-
+        if(child.getPqIndex() == 0){
+            root = child;
+        }else{
+            updateToFile(child);
+        }
+        if(parent.getPqIndex() == 0){
+            root = parent;
+        }else{
+            updateToFile(parent);
+        }
     }
 
     private PQNode retrievePQNode(int i) throws Exception{
@@ -208,7 +214,8 @@ public class ExternalPriorityQueue {
            }
        }
        nodes.set(replaceIndex,node);
-       File file = new File(DIRECTORY + getMapFileName(NAME_PATTERN, node.getPqIndex()));
+       int fileId = (node.getPqIndex()-1)/ENTRY_BLOCK_SIZE;
+       File file = new File(DIRECTORY + getMapFileName(NAME_PATTERN, fileId));
        storeToFile(file,nodes);
    }
 
