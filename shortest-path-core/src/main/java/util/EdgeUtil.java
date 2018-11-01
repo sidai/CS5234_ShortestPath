@@ -1,16 +1,20 @@
 package util;
 
-import com.opencsv.CSVWriter;
-import com.opencsv.bean.ColumnPositionMappingStrategy;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
-import com.opencsv.bean.StatefulBeanToCsv;
-import com.opencsv.bean.StatefulBeanToCsvBuilder;
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+import com.univocity.parsers.common.processor.BeanListProcessor;
+import com.univocity.parsers.common.processor.BeanWriterProcessor;
+import com.univocity.parsers.csv.CsvParser;
+import com.univocity.parsers.csv.CsvParserSettings;
+import com.univocity.parsers.csv.CsvWriter;
+import com.univocity.parsers.csv.CsvWriterSettings;
 import vo.Edge;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -44,47 +48,37 @@ public class EdgeUtil {
         return edgeList;
     }
 
-    public void storeToCSV(String storagePath) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
-
+    public void storeToCSV(String storagePath) throws IOException {
         Path pathToFile = Paths.get(storagePath);
         if(!Files.exists(pathToFile)) {
             Files.createDirectories(pathToFile.getParent());
             Files.createFile(pathToFile);
         }
 
-        try (Writer writer = Files.newBufferedWriter(pathToFile)) {
-            StatefulBeanToCsv<Edge> beanToCsv = new StatefulBeanToCsvBuilder(writer)
-                    .withMappingStrategy(getStrategy())
-                    .withQuotechar(CSVWriter.NO_QUOTE_CHARACTER)
-                    .build();
-
-            beanToCsv.write(edgeList);
-        } catch (Exception ex) {
-            throw ex;
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(storagePath)))) {
+            CsvWriterSettings settings = new CsvWriterSettings();
+            settings.setQuoteAllFields(true);
+            settings.setHeaderWritingEnabled(true);
+            BeanWriterProcessor<Edge> processor = new BeanWriterProcessor<>(Edge.class);
+            settings.setRowWriterProcessor(processor);
+            CsvWriter csvWriter = new CsvWriter(writer, settings);
+            for(Edge edge: edgeList) {
+                csvWriter.processRecord(edge);
+            }
         }
     }
 
     public List<Edge> loadFromCSV(String storagePath) throws IOException {
+        CsvParserSettings parserSettings = new CsvParserSettings();
+        parserSettings.setHeaderExtractionEnabled(true);
+        BeanListProcessor<Edge> processor = new BeanListProcessor<>(Edge.class);
+        parserSettings.setProcessor(processor);
+        CsvParser parser = new CsvParser(parserSettings);
 
-        Path pathToFile = Paths.get(storagePath);
-
-        try (Reader reader = Files.newBufferedReader(pathToFile)) {
-            CsvToBean<Edge> csvToBean = new CsvToBeanBuilder(reader)
-                    .withMappingStrategy(getStrategy())
-                    .withIgnoreLeadingWhiteSpace(true)
-                    .build();
-
-            List<Edge> edgeList = csvToBean.parse();
+        try (Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(storagePath)))) {
+            parser.parse(reader);
+            edgeList = processor.getBeans();
             return edgeList;
-        } catch (Exception ex) {
-            throw ex;
         }
-    }
-
-    private ColumnPositionMappingStrategy<Edge> getStrategy() {
-        ColumnPositionMappingStrategy<Edge> strategy = new CustomMappingStrategy<>();
-        strategy.setType(Edge.class);
-
-        return strategy;
     }
 }

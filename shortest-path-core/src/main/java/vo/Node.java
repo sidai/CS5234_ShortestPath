@@ -1,21 +1,23 @@
 package vo;
 
-import com.opencsv.bean.CsvBindByName;
-import com.opencsv.bean.CsvBindByPosition;
+import com.univocity.parsers.annotations.Headers;
+import com.univocity.parsers.annotations.Parsed;
 
+@Headers(sequence = {"id", "latitude", "longitude"})
 public class Node {
 
-    @CsvBindByName (column = "id", required = true)
-    @CsvBindByPosition(position = 0)
+    @Parsed(field = "id")
     private int nodeId;
 
-    @CsvBindByName (column = "latitude", required = true)
-    @CsvBindByPosition(position = 1)
+    @Parsed
     private double latitude;
 
-    @CsvBindByName (column = "longitude", required = true)
-    @CsvBindByPosition(position = 2)
+    @Parsed
     private double longitude;
+
+    public Node() {
+
+    }
 
     public Node(int nodeId, double latitude, double longitude) {
         this.nodeId = nodeId;

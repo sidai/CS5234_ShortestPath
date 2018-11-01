@@ -1,19 +1,18 @@
 package vo;
 
-import com.opencsv.bean.CsvBindByName;
-import com.opencsv.bean.CsvBindByPosition;
+import com.univocity.parsers.annotations.Headers;
+import com.univocity.parsers.annotations.Parsed;
 
-public class AdjListEntryDTO {
+@Headers(sequence = {"id", "neighbors"})
+public class AdjListEntry {
 
-    @CsvBindByName(column = "id", required = true)
-    @CsvBindByPosition(position = 0)
+    @Parsed(field = "id")
     private int nodeId;
 
-    @CsvBindByName (column = "neighbors", required = true)
-    @CsvBindByPosition(position = 1)
+    @Parsed(field = "neighbors")
     private String neighborString;
 
-    public AdjListEntryDTO(int nodeId, String neighborString) {
+    public AdjListEntry(int nodeId, String neighborString) {
         this.nodeId = nodeId;
         this.neighborString = neighborString;
     }

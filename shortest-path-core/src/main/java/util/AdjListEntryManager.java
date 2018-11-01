@@ -35,7 +35,7 @@ public class AdjListEntryManager {
         blockMap.get(identifier).addNeighbors(nodeId, neighbor);
     }
 
-    public void storeAdjListEntry() throws Exception {
+    public void storeAllBlock() throws Exception {
         for(File identifier: blockMap.keySet()) {
             blockMap.get(identifier).storeToFile(identifier);
         }
@@ -73,6 +73,7 @@ public class AdjListEntryManager {
             if (!Files.exists(pathToDirectory)) {
                 Files.createDirectories(pathToDirectory);
             }
+
             for (int fileId = 0; fileId <= Math.ceil(nodeSize / entryBlockSize); fileId++) {
                 File file = new File(directory + getMapFileName(pattern, fileId));
                 if (!file.exists()) {
