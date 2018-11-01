@@ -17,7 +17,7 @@ class Dijkstra {
     AdjListEntryManager manager;
     ExternalResult result;
     ExternalPriorityQueue pq;
-    Dijkstra() throws Exception{
+    Dijkstra() throws Exception {
         manager = new AdjListEntryManager();
         pq = new ExternalPriorityQueue();
         result = new ExternalResult();

@@ -1,21 +1,19 @@
 package vo;
 
-import com.opencsv.bean.CsvBindByName;
-import com.opencsv.bean.CsvBindByPosition;
+import com.univocity.parsers.annotations.Headers;
+import com.univocity.parsers.annotations.Parsed;
 
+@Headers(sequence = {"id", "dist", "pqIndex"})
 public class PQNode implements Comparable<PQNode>
 {
     public static int EMPTY_POINTER = -1;
-    @CsvBindByName (column = "nodeId", required = true)
-    @CsvBindByPosition(position = 0)
+    @Parsed(field = "id")
     private int nodeId;
 
-    @CsvBindByName (column = "dist", required = true)
-    @CsvBindByPosition(position = 1)
+    @Parsed
     private double dist;
 
-    @CsvBindByName (column = "pqIndex", required = true)
-    @CsvBindByPosition(position = 2)
+    @Parsed
     private int pqIndex;
 
     public PQNode(int node, double dist)

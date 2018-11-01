@@ -1,8 +1,11 @@
 package util;
 
-import com.opencsv.CSVWriter;
-import com.opencsv.bean.*;
-import vo.Node;
+import com.univocity.parsers.common.processor.BeanListProcessor;
+import com.univocity.parsers.common.processor.BeanWriterProcessor;
+import com.univocity.parsers.csv.CsvParser;
+import com.univocity.parsers.csv.CsvParserSettings;
+import com.univocity.parsers.csv.CsvWriter;
+import com.univocity.parsers.csv.CsvWriterSettings;
 import vo.PQNode;
 
 import java.io.*;
@@ -24,7 +27,11 @@ public class ExternalPriorityQueue {
     private PQNode root;
     private int nodeCount = 0;
 
-    public ExternalPriorityQueue() {
+    public ExternalPriorityQueue() throws Exception {
+        Path pathToDirectory = Paths.get(DIRECTORY);
+        if (!Files.exists(pathToDirectory)) {
+            Files.createDirectories(pathToDirectory);
+        }
         this.root = null;
     }
 
@@ -172,15 +179,9 @@ public class ExternalPriorityQueue {
 
    private void insertToFile (PQNode node) throws Exception{
         //insert to last file
-       Path pathToDirectory = Paths.get(DIRECTORY);
-       if (!Files.exists(pathToDirectory)) {
-           Files.createDirectories(pathToDirectory);
-       }
        int fileId = (node.getPqIndex()-1)/ENTRY_BLOCK_SIZE;
        File file = new File(DIRECTORY + getMapFileName(NAME_PATTERN, fileId));
-       if (!file.exists()) {
-           file.createNewFile();
-       }
+
        List<PQNode> nodes = retrieveWholeFile(node.getPqIndex());
        nodes.add(node);
 
@@ -249,38 +250,39 @@ public class ExternalPriorityQueue {
 
 //
     public List<PQNode> readFromFile(File file) throws Exception {
-//        try (Reader reader = new BufferedReader(new FileReader(file))) {
-//            CsvToBean<PQNode> csvToBean = new CsvToBeanBuilder(reader)
-//                    .withMappingStrategy(getStrategy())
-//                    .withQuoteChar(CSVWriter.DEFAULT_QUOTE_CHARACTER)
-//                    .withIgnoreLeadingWhiteSpace(true)
-//                    .build();
-//
-//            addAdjListEntry(csvToBean.parse());
-//            return adjListEntryMap;
-//        } catch (Exception ex) {
-//            throw ex;
-//        }
-        return new ArrayList<>();
-    }
 
-    public void storeToFile(File file,List<PQNode> pqNodes) throws Exception {
-        try (Writer writer = new BufferedWriter(new FileWriter(file))) {
-            StatefulBeanToCsv<PQNode> beanToCsv = new StatefulBeanToCsvBuilder(writer)
-                    .withMappingStrategy(getStrategy())
-                    .withQuotechar(CSVWriter.DEFAULT_QUOTE_CHARACTER)
-                    .build();
+        if (!file.exists()) {
+            file.createNewFile();
+        }
 
-            beanToCsv.write(pqNodes);
-        } catch (Exception ex) {
-            throw ex;
+        try (Reader reader = new BufferedReader(new FileReader(file))) {
+            CsvParserSettings parserSettings = new CsvParserSettings();
+            parserSettings.setHeaderExtractionEnabled(true);
+            BeanListProcessor<PQNode> processor = new BeanListProcessor<>(PQNode.class);
+            parserSettings.setProcessor(processor);
+            CsvParser parser = new CsvParser(parserSettings);
+
+            parser.parse(reader);
+            return processor.getBeans();
         }
     }
 
-    private ColumnPositionMappingStrategy<PQNode> getStrategy() {
-        ColumnPositionMappingStrategy<PQNode> strategy = new CustomMappingStrategy<>();
-        strategy.setType(PQNode.class);
+    public void storeToFile(File file, List<PQNode> pqNodes) throws Exception {
 
-        return strategy;
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+
+        try (Writer writer = new BufferedWriter(new FileWriter(file))) {
+            CsvWriterSettings settings = new CsvWriterSettings();
+            settings.setQuoteAllFields(true);
+            settings.setHeaderWritingEnabled(true);
+            BeanWriterProcessor<PQNode> processor = new BeanWriterProcessor<>(PQNode.class);
+            settings.setRowWriterProcessor(processor);
+            CsvWriter csvWriter = new CsvWriter(writer, settings);
+            for(PQNode node: pqNodes) {
+                csvWriter.processRecord(node);
+            }
+        }
     }
 }

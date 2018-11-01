@@ -1,18 +1,16 @@
 package vo;
 
-import com.opencsv.bean.CsvBindByName;
-import com.opencsv.bean.CsvBindByPosition;
+import com.univocity.parsers.annotations.Headers;
+import com.univocity.parsers.annotations.Parsed;
 
+@Headers(sequence = {"id", "dist"})
 public class ResultNode
 {
-    @CsvBindByName (column = "nodeId", required = true)
-    @CsvBindByPosition(position = 0)
+    @Parsed(field = "id")
     private int nodeId;
 
-    @CsvBindByName (column = "dist", required = true)
-    @CsvBindByPosition(position = 1)
+    @Parsed
     private double dist;
-
 
     public ResultNode(int node, double dist)
     {

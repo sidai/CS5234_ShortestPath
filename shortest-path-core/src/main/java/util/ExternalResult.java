@@ -1,10 +1,13 @@
 package util;
 
-import com.opencsv.CSVWriter;
-import com.opencsv.bean.*;
+import com.univocity.parsers.common.processor.BeanListProcessor;
+import com.univocity.parsers.common.processor.BeanWriterProcessor;
+import com.univocity.parsers.csv.CsvParser;
+import com.univocity.parsers.csv.CsvParserSettings;
+import com.univocity.parsers.csv.CsvWriter;
+import com.univocity.parsers.csv.CsvWriterSettings;
 import vo.ResultNode;
 
-import javax.xml.transform.Result;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,7 +25,10 @@ public class ExternalResult {
 
 
     public ExternalResult() throws Exception {
-
+        Path pathToDirectory = Paths.get(DIRECTORY);
+        if (!Files.exists(pathToDirectory)) {
+            Files.createDirectories(pathToDirectory);
+        }
     }
 
 
@@ -101,40 +107,38 @@ public class ExternalResult {
     }
 
     public List<ResultNode> readFromFile(File file) throws Exception {
-//        try (Reader reader = new BufferedReader(new FileReader(file))) {
-//            CsvToBean<PQNode> csvToBean = new CsvToBeanBuilder(reader)
-//                    .withMappingStrategy(getStrategy())
-//                    .withQuoteChar(CSVWriter.DEFAULT_QUOTE_CHARACTER)
-//                    .withIgnoreLeadingWhiteSpace(true)
-//                    .build();
-//
-//            addAdjListEntry(csvToBean.parse());
-//            return adjListEntryMap;
-//        } catch (Exception ex) {
-//            throw ex;
-//        }
-        return new ArrayList<>();
-    }
+        if (!file.exists()) {
+            file.createNewFile();
+        }
 
+        try (Reader reader = new BufferedReader(new FileReader(file))) {
+            CsvParserSettings parserSettings = new CsvParserSettings();
+            parserSettings.setHeaderExtractionEnabled(true);
+            BeanListProcessor<ResultNode> processor = new BeanListProcessor<>(ResultNode.class);
+            parserSettings.setProcessor(processor);
+            CsvParser parser = new CsvParser(parserSettings);
 
-    public void storeToFile(File file,List<ResultNode> resultNodes) throws Exception {
-        try (Writer writer = new BufferedWriter(new FileWriter(file))) {
-            StatefulBeanToCsv<ResultNode> beanToCsv = new StatefulBeanToCsvBuilder(writer)
-                    .withMappingStrategy(getStrategy())
-                    .withQuotechar(CSVWriter.DEFAULT_QUOTE_CHARACTER)
-                    .build();
-
-            beanToCsv.write(resultNodes);
-        } catch (Exception ex) {
-            throw ex;
+            parser.parse(reader);
+            return processor.getBeans();
         }
     }
 
-    private ColumnPositionMappingStrategy<ResultNode> getStrategy() {
-        ColumnPositionMappingStrategy<ResultNode> strategy = new CustomMappingStrategy<>();
-        strategy.setType(ResultNode.class);
 
-        return strategy;
+    public void storeToFile(File file, List<ResultNode> resultNodes) throws Exception {
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+
+        try (Writer writer = new BufferedWriter(new FileWriter(file))) {
+            CsvWriterSettings settings = new CsvWriterSettings();
+            settings.setQuoteAllFields(true);
+            settings.setHeaderWritingEnabled(true);
+            BeanWriterProcessor<ResultNode> processor = new BeanWriterProcessor<>(ResultNode.class);
+            settings.setRowWriterProcessor(processor);
+            CsvWriter csvWriter = new CsvWriter(writer, settings);
+            for (ResultNode node : resultNodes) {
+                csvWriter.processRecord(node);
+            }
+        }
     }
-
 }

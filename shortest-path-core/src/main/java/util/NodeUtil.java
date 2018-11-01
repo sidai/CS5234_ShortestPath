@@ -63,13 +63,13 @@ public class NodeUtil {
     }
 
     public List<Node> loadFromCSV(String storagePath) throws IOException {
-        CsvParserSettings parserSettings = new CsvParserSettings();
-        parserSettings.setHeaderExtractionEnabled(true);
-        BeanListProcessor<Node> processor = new BeanListProcessor<>(Node.class);
-        parserSettings.setProcessor(processor);
-        CsvParser parser = new CsvParser(parserSettings);
 
         try (Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(storagePath)))) {
+            CsvParserSettings parserSettings = new CsvParserSettings();
+            parserSettings.setHeaderExtractionEnabled(true);
+            BeanListProcessor<Node> processor = new BeanListProcessor<>(Node.class);
+            parserSettings.setProcessor(processor);
+            CsvParser parser = new CsvParser(parserSettings);
             parser.parse(reader);
             nodeList = processor.getBeans();
             return nodeList;
