@@ -1,74 +1,65 @@
 package sssp;
 
 import java.util.Map;
+import java.util.List;
 import java.util.HashMap;
 import java.util.PriorityQueue;
-import java.util.Comparator;
+import util.ExternalResult;
+import util.AdjListEntryManager;
+import util.ExternalPriorityQueue;
+import vo.Neighbor;
+import vo.PQNode;
 
-class Node implements Comparator<Node>
-{
-    public int node;
-    public double dist;
 
-    public Node()
-    {
-    }
 
-    public Node(int node, double dist)
-    {
-        this.node = node;
-        this.dist = dist;
-    }
-
-    @Override
-    public int compare(Node node1, Node node2)
-    {
-        if (node1.dist < node2.dist)
-            return -1;
-        if (node1.dist > node2.dist)
-            return 1;
-        return 0;
-    }
-}
 
 class Dijkstra {
-    IOProcesser iop;
-    HashMap<Integer,Double> results;
-    Dijkstra(){
-        iop = new IOProcesser();
-        results = new HashMap<>();
+    AdjListEntryManager manager;
+    ExternalResult result;
+    ExternalPriorityQueue pq;
+    Dijkstra() throws Exception{
+        manager = new AdjListEntryManager();
+        pq = new ExternalPriorityQueue();
+        result = new ExternalResult();
     }
 
-    void dijkstra(int src)
+    void dijkstra(int src) throws Exception
     {
-        iop.writeDistance(src,0);
 
-        double currentDistance = iop.readDistance(src);
+        double currentDistance = 0;
 
-        PriorityQueue<Node> pq = new PriorityQueue<>();
+        pq.insert(new PQNode(src,0));
+
 
         while(!pq.isEmpty()) {
 
-            Map<Integer,Double> neighbors = iop.getNeighbors(src);
+            List<Neighbor> neighbors = manager.readAdjListEntry(src);
 
-            for (Map.Entry<Integer, Double> entry : neighbors.entrySet()) {
-                int node = entry.getKey();
-                if(!iop.getVisited(node)) {
-                    double distance = entry.getValue() + currentDistance;
+            for (Neighbor neighbor : neighbors) {
+                double distance = neighbor.getDistance() + currentDistance;
+                PQNode pqnode = new PQNode(neighbor.getId(),distance);
+                //check node already in result files
+                if(result.retrieveCost(pqnode.getNodeId())==-1) {
+                    PQNode existNode = pq.retrieve(pqnode);
+                    if (existNode != null) {
 
-                    double originalDistance = iop.readDistance(node);
-                    if (distance > originalDistance) {
-                        iop.writeDistance(node, distance);
-                        pq.add(new Node(node, distance));
+                        double originalDistance = existNode.getDist();
+                        if (distance < originalDistance) {
+
+                            pq.update(pqnode);
+                        }
+                    } else {
+                        pq.insert(pqnode);
                     }
                 }
             }
 
-            Node nextNode = pq.remove();
-            src = nextNode.node;
-            currentDistance = nextNode.dist;
-            results.put(src,currentDistance);
-            iop.setVisited(src);
+            PQNode nextNode = pq.pop();
+            src = nextNode.getNodeId();
+            currentDistance = nextNode.getDist();
+            result.insertResult(src, currentDistance);
+
+
         }
 
 

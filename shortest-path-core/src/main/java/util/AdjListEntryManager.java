@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 public class AdjListEntryManager {
 
@@ -38,6 +39,14 @@ public class AdjListEntryManager {
         for(File identifier: blockMap.keySet()) {
             blockMap.get(identifier).storeToFile(identifier);
         }
+    }
+
+    public List<Neighbor> readAdjListEntry(int nodeId) throws Exception {
+        File identifier = adjListEntryIndex.getBlockIdentifier(nodeId);
+        if (!blockMap.containsKey(identifier)) {
+            blockMap.put(identifier, new AdjListEntryBlockUtil());
+        }
+        return blockMap.get(identifier).readFromFile(identifier).get(nodeId);
     }
 
     public Map<File, AdjListEntryBlockUtil> getBlockMap() {
