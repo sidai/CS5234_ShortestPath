@@ -16,6 +16,10 @@ public class PQNode implements Comparable<PQNode>
     @Parsed
     private int pqIndex;
 
+    public PQNode() {
+
+    }
+
     public PQNode(int node, double dist)
     {
         this.nodeId = node;

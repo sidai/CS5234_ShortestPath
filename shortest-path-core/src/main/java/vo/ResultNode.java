@@ -12,6 +12,10 @@ public class ResultNode
     @Parsed
     private double dist;
 
+    public ResultNode() {
+
+    }
+    
     public ResultNode(int node, double dist)
     {
         this.nodeId = node;
