@@ -5,9 +5,11 @@ import util.AdjListEntryManager;
 import util.EdgeUtil;
 import util.GraphUtil;
 import util.NodeUtil;
+import vo.Edge;
 import vo.Neighbor;
 
 import java.io.FileReader;
+import java.util.List;
 
 public class Preprocessing {
 
@@ -18,9 +20,9 @@ public class Preprocessing {
 
     public void run() {
         try {
-//            parseOSMMap();
-            prepareEdgeList();
-            prepareAdjList();
+            loadFromCSV();
+//            prepareEdgeList();
+//            prepareAdjList();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -40,7 +42,7 @@ public class Preprocessing {
             manager.addNeighbor(from, new Neighbor(to, dist));
 
         }
-        manager.storeAdjListEntry();
+        manager.storeAllBlock();
         System.out.println(manager.getBlockMap().size());
     }
 
@@ -62,6 +64,16 @@ public class Preprocessing {
         }
         edgeUtil.sort();
         System.out.println(edgeUtil.getEdgeSize());
+        edgeUtil.storeToCSV(edgeStoreCSV);
+    }
+
+    private void loadFromCSV() throws Exception {
+        Edge.class.newInstance();
+        EdgeUtil edgeUtil = new EdgeUtil();
+        String edgeCSV = "./map-data/sorted-graph/edge.csv";
+        List<Edge> edgeList = edgeUtil.loadFromCSV(edgeCSV);
+        System.out.println(edgeList.size());
+        String edgeStoreCSV = "./map-data/temp/edge.csv";
         edgeUtil.storeToCSV(edgeStoreCSV);
     }
 

@@ -1,21 +1,22 @@
 package vo;
 
-import com.opencsv.bean.CsvBindByName;
-import com.opencsv.bean.CsvBindByPosition;
+import com.univocity.parsers.annotations.Headers;
+import com.univocity.parsers.annotations.Parsed;
 
+@Headers(sequence = {"from_node", "to_node", "distance"})
 public class Edge {
 
-    @CsvBindByName (column = "from_node", required = true)
-    @CsvBindByPosition(position = 0)
+    @Parsed(field = "from_node")
     private int fromNode;
 
-    @CsvBindByName (column = "to_node", required = true)
-    @CsvBindByPosition(position = 1)
+    @Parsed(field = "to_node")
     private int toNode;
 
-    @CsvBindByName (column = "distance", required = true)
-    @CsvBindByPosition(position = 2)
+    @Parsed
     private double distance;
+
+    public Edge() {
+    }
 
     public Edge(int fromNode, int toNode, double distance) {
         this.fromNode = fromNode;

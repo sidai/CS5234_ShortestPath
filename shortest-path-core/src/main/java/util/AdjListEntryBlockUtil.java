@@ -1,21 +1,15 @@
 package util;
 
-import com.opencsv.CSVWriter;
-import com.opencsv.bean.ColumnPositionMappingStrategy;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
-import com.opencsv.bean.StatefulBeanToCsv;
-import com.opencsv.bean.StatefulBeanToCsvBuilder;
-import vo.AdjListEntryDTO;
+import com.univocity.parsers.common.processor.BeanListProcessor;
+import com.univocity.parsers.common.processor.BeanWriterProcessor;
+import com.univocity.parsers.csv.CsvParser;
+import com.univocity.parsers.csv.CsvParserSettings;
+import com.univocity.parsers.csv.CsvWriter;
+import com.univocity.parsers.csv.CsvWriterSettings;
+import vo.AdjListEntry;
 import vo.Neighbor;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +20,6 @@ import java.util.regex.Pattern;
 public class AdjListEntryBlockUtil {
 
     private Map<Integer, List<Neighbor>> adjListEntryMap;
-    private File file;
 
     private static final String DECODE_PATTERN = "([0-9]+),(([0-9]*[.])?[0-9]+)";
     private static final String ENCODE_PATTERN = "[%d, %f]";
@@ -35,12 +28,12 @@ public class AdjListEntryBlockUtil {
         adjListEntryMap = new TreeMap<>();
     }
 
-    public void addAdjListEntry(AdjListEntryDTO adjListEntry) {
+    public void addAdjListEntry(AdjListEntry adjListEntry) {
         adjListEntryMap.put(adjListEntry.getNodeId(), decodeNeighborString(adjListEntry.getNeighborString()));
     }
 
-    public void addAdjListEntry(List<AdjListEntryDTO> adjListEntryList) {
-        for(AdjListEntryDTO entry: adjListEntryList) {
+    public void addAdjListEntry(List<AdjListEntry> adjListEntryList) {
+        for(AdjListEntry entry: adjListEntryList) {
             addAdjListEntry(entry);
         }
     }
@@ -58,45 +51,40 @@ public class AdjListEntryBlockUtil {
         return adjListEntryMap;
     }
 
-    public List<AdjListEntryDTO> getAdjListEntryList() {
-        List<AdjListEntryDTO> adjListEntryDTOList = new ArrayList<>();
-        adjListEntryMap.forEach((id, neighbors) -> adjListEntryDTOList.add(new AdjListEntryDTO(id, decodeNeighborList(neighbors))));
-        return adjListEntryDTOList;
+    public List<AdjListEntry> getAdjListEntryList() {
+        List<AdjListEntry> adjListEntryList = new ArrayList<>();
+        adjListEntryMap.forEach((id, neighbors) -> adjListEntryList.add(new AdjListEntry(id, decodeNeighborList(neighbors))));
+        return adjListEntryList;
     }
 
-    public Map<Integer, List<Neighbor>> readFromFile(File file) throws Exception {
+
+    public void storeToFile(File file) throws IOException {
+
+        try (Writer writer = new BufferedWriter((new FileWriter(file)))) {
+            CsvWriterSettings settings = new CsvWriterSettings();
+            settings.setQuoteAllFields(true);
+            settings.setHeaderWritingEnabled(true);
+            BeanWriterProcessor<AdjListEntry> processor = new BeanWriterProcessor<>(AdjListEntry.class);
+            settings.setRowWriterProcessor(processor);
+            CsvWriter csvWriter = new CsvWriter(writer, settings);
+            for(AdjListEntry entry: getAdjListEntryList()) {
+                csvWriter.processRecord(entry);
+            }
+        }
+    }
+
+    public Map<Integer, List<Neighbor>> readFromFile(File file) throws IOException {
+
         try (Reader reader = new BufferedReader(new FileReader(file))) {
-            CsvToBean<AdjListEntryDTO> csvToBean = new CsvToBeanBuilder(reader)
-                    .withMappingStrategy(getStrategy())
-                    .withQuoteChar(CSVWriter.DEFAULT_QUOTE_CHARACTER)
-                    .withIgnoreLeadingWhiteSpace(true)
-                    .build();
-
-            addAdjListEntry(csvToBean.parse());
+            CsvParserSettings parserSettings = new CsvParserSettings();
+            parserSettings.setHeaderExtractionEnabled(true);
+            BeanListProcessor<AdjListEntry> processor = new BeanListProcessor<>(AdjListEntry.class);
+            parserSettings.setProcessor(processor);
+            CsvParser parser = new CsvParser(parserSettings);
+            parser.parse(reader);
+            addAdjListEntry(processor.getBeans());
             return adjListEntryMap;
-        } catch (Exception ex) {
-            throw ex;
         }
-    }
-
-    public void storeToFile(File file) throws Exception {
-        try (Writer writer = new BufferedWriter(new FileWriter(file))) {
-            StatefulBeanToCsv<AdjListEntryDTO> beanToCsv = new StatefulBeanToCsvBuilder(writer)
-                    .withMappingStrategy(getStrategy())
-                    .withQuotechar(CSVWriter.DEFAULT_QUOTE_CHARACTER)
-                    .build();
-
-            beanToCsv.write(getAdjListEntryList());
-        } catch (Exception ex) {
-            throw ex;
-        }
-    }
-
-    private ColumnPositionMappingStrategy<AdjListEntryDTO> getStrategy() {
-        ColumnPositionMappingStrategy<AdjListEntryDTO> strategy = new CustomMappingStrategy<>();
-        strategy.setType(AdjListEntryDTO.class);
-
-        return strategy;
     }
 
 
