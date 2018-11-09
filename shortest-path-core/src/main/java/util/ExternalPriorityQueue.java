@@ -106,9 +106,9 @@ public class ExternalPriorityQueue {
     }
 
     public void insert(PQNode node) throws Exception{
-        nodeCount++;
 
         node.setPqIndex(nodeCount);
+        nodeCount++;
         if(nodeCount==1){
             root = node;
             return;
