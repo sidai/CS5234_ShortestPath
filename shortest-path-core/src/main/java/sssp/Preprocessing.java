@@ -3,11 +3,13 @@ package sssp;
 import com.opencsv.CSVReader;
 import util.AdjListEntryManager;
 import util.EdgeUtil;
-import util.GraphUtil;
+//import util.GraphUtil;
 import util.NodeUtil;
 import vo.Neighbor;
 
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Preprocessing {
 
@@ -19,8 +21,8 @@ public class Preprocessing {
     public void run() {
         try {
 //            parseOSMMap();
-            prepareEdgeList();
-            prepareAdjList();
+//            prepareEdgeList();
+//            prepareAdjList();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -40,7 +42,7 @@ public class Preprocessing {
             manager.addNeighbor(from, new Neighbor(to, dist));
 
         }
-        manager.storeAdjListEntry();
+        manager.storeAllBlock();
         System.out.println(manager.getBlockMap().size());
     }
 
@@ -74,18 +76,18 @@ public class Preprocessing {
 //        storeNodeEdgeInfo(graphUtil, nodeCSV, edgeCSV);
 //        System.out.println("Done with China");
 //    }
-
-    private void storeNodeEdgeInfo(GraphUtil graphUtil, String nodeCSV, String edgeCSV) {
-        try {
-            NodeUtil nodeUtil = graphUtil.getNodeUtil();
-            nodeUtil.storeToCSV(nodeCSV);
-
-            EdgeUtil edgeUtil = graphUtil.getEdgeUtil();
-            edgeUtil.storeToCSV(edgeCSV);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//
+//    private void storeNodeEdgeInfo(GraphUtil graphUtil, String nodeCSV, String edgeCSV) {
+//        try {
+//            NodeUtil nodeUtil = graphUtil.getNodeUtil();
+//            nodeUtil.storeToCSV(nodeCSV);
+//
+//            EdgeUtil edgeUtil = graphUtil.getEdgeUtil();
+//            edgeUtil.storeToCSV(edgeCSV);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 //    private GraphUtil getMapInfo(String osmPath, String hopperLocation) {
 //        GraphUtil graphUtil = new GraphUtil();
