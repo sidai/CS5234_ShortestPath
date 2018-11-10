@@ -18,14 +18,17 @@ import java.util.*;
 
 public class ExternalPriorityQueue {
 
-    //private static int ENTRY_BLOCK_SIZE = 10000;
+    private static int ENTRY_BLOCK_SIZE = 10400;
     private static String DIRECTORY = "./map-data/priority-queue/";
     private static String NAME_PATTERN = "EXTERNAL_PRIORITYQUEUE_ENTRY_[%d-%d).csv";
 
-    private static int ENTRY_BLOCK_SIZE = 5;
+//    private static int ENTRY_BLOCK_SIZE = 5;
 
     private PQNode root;
     private int nodeCount = 0;
+
+    public int IOReadCount = 0;
+    public int IOWriteCount = 0;
 
     public ExternalPriorityQueue() throws Exception {
         Path pathToDirectory = Paths.get(DIRECTORY);
@@ -95,11 +98,6 @@ public class ExternalPriorityQueue {
         PQNode parent = retrievePQNode(parentIndex);
         while(!parent.equals(node) && node.compareTo(parent)<0){
             swap(node,parent);
-
-//            parentIndex = parent.getPqIndex();
-//            parent.setPqIndex(node.getPqIndex());
-//            node.setPqIndex(parentIndex);
-
             parent = retrievePQNode(parent(node.getPqIndex()));
         }
     }
@@ -128,10 +126,6 @@ public class ExternalPriorityQueue {
         PQNode parent = retrievePQNode(parentIndex);
         while(parent!=null && !parent.equals(node) && node.compareTo(parent)<0){
             swap(node,parent);
-
-//            parentIndex = parent.getPqIndex();
-//            parent.setPqIndex(node.getPqIndex());
-//            node.setPqIndex(parentIndex);
 
             parent = retrievePQNode(parent(node.getPqIndex()));
         }
@@ -254,17 +248,6 @@ public class ExternalPriorityQueue {
         return readFromFile(file);
     }
 
-//    public File getBlockIdentifier(int pqIndexId) {
-//        int fileId = getMapIdInt(pqIndexId);
-//        Assert.check(ENTRY_INDEX.containsKey(fileId), pqIndexId);
-//
-//        return ENTRY_INDEX.get(fileId);
-//    }
-//    private int getMapIdInt(int pqIndexId) {
-//        Assert.check(pqIndexId < nodeCount);
-//
-//        return (pqIndexId-1) / ENTRY_BLOCK_SIZE; //root in memory
-//    }
     private String getMapFileName(String pattern, int fileId) {
         int from = fileId * ENTRY_BLOCK_SIZE +1;
         int to = (fileId + 1) * ENTRY_BLOCK_SIZE +1;
@@ -274,7 +257,7 @@ public class ExternalPriorityQueue {
 
 //
     public List<PQNode> readFromFile(File file) throws Exception {
-
+        IOReadCount ++;
         if (!file.exists()) {
             file.createNewFile();
         }
@@ -292,7 +275,7 @@ public class ExternalPriorityQueue {
     }
 
     public void storeToFile(File file, List<PQNode> pqNodes) throws Exception {
-
+        IOWriteCount ++;
         if (!file.exists()) {
             file.createNewFile();
         }

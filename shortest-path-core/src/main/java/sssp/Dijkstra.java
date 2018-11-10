@@ -38,7 +38,7 @@ class Dijkstra {
         while(!pq.isEmpty()) {
 
             PQNode nextNode = pq.pop();
-            System.out.println("pop "+nextNode.getNodeId());
+//            System.out.println("pop "+nextNode.getNodeId());
             src = nextNode.getNodeId();
             currentDistance = nextNode.getDist();
             result.insertResult(src, currentDistance);
@@ -46,31 +46,28 @@ class Dijkstra {
             List<Neighbor> neighbors = manager.readAdjListEntry(src);
 
             for (Neighbor neighbor : neighbors) {
-                System.out.println("neibhgor "+neighbor.getId());
+//                System.out.println("neibhgor "+neighbor.getId());
                 double distance = neighbor.getDistance() + currentDistance;
                 PQNode pqnode = new PQNode(neighbor.getId(),distance);
                 //check node already in result files
-                System.out.println("get result "+result.retrieveCost(pqnode.getNodeId()));
+//                System.out.println("get result "+result.retrieveCost(pqnode.getNodeId()));
                 if(result.retrieveCost(pqnode.getNodeId())==-1) {
                     PQNode existNode = pq.retrieve(pqnode);
                     if (existNode != null) {
 
                         double originalDistance = existNode.getDist();
                         if (distance < originalDistance) {
-
-                            pq.update(pqnode);
+                            existNode.setDist(distance);
+                            pq.update(existNode);
                         }
                     } else {
                         pq.insert(pqnode);
                     }
                 }
             }
-
-
-
+//            System.out.println("done neighbor");
         }
-
-
+        System.out.println("Priority Queue Read:"+pq.IOReadCount+" Priority Queue Write:"+pq.IOWriteCount);
+        System.out.println("Result Read:"+result.IOReadCount+" Result Write:"+result.IOWriteCount);
     }
-
 }

@@ -18,14 +18,17 @@ import java.util.*;
 
 public class ExternalResult {
 
-    //private static int ENTRY_BLOCK_SIZE = 10000;
+    private static int ENTRY_BLOCK_SIZE = 13867;
 
     private static String DIRECTORY = "./map-data/external-result/";
     private static String NAME_PATTERN = "EXTERNAL_RESULT_[%d-%d).csv";
 
-    private static int ENTRY_BLOCK_SIZE = 10;
+//    private static int ENTRY_BLOCK_SIZE = 10;
 
     private int resultCount = 0;
+
+    public int IOReadCount = 0;
+    public int IOWriteCount = 0;
 
     public ExternalResult() throws Exception {
         Path pathToDirectory = Paths.get(DIRECTORY);
@@ -46,11 +49,11 @@ public class ExternalResult {
     }
 
     public void insertResult(int nodeId, double dist) throws Exception{
-
+        
         insertToFile(new ResultNode(nodeId,dist));
         resultCount+=1;
         if(resultCount%1000==0){
-            System.out.println(resultCount);
+            System.out.println("result count "+resultCount);
         }
     }
 
@@ -122,6 +125,7 @@ public class ExternalResult {
     }
 
     public List<ResultNode> readFromFile(File file) throws Exception {
+        IOReadCount++;
         if (!file.exists()) {
             file.createNewFile();
         }
@@ -140,6 +144,7 @@ public class ExternalResult {
 
 
     public void storeToFile(File file, List<ResultNode> resultNodes) throws Exception {
+        IOWriteCount++;
         if (!file.exists()) {
             file.createNewFile();
         }

@@ -75,7 +75,7 @@ public class PQNode implements Comparable<PQNode>
         return dist;
     }
 
-    public void setDist(int dist) {
+    public void setDist(double dist) {
         this.dist = dist;
     }
 }

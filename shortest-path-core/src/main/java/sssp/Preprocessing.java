@@ -22,9 +22,13 @@ public class Preprocessing {
 //            parseOSMMap();
 //            prepareEdgeList();
 //            prepareAdjList();
-
+            final long startTime = System.currentTimeMillis();
             Dijkstra dj = new Dijkstra();
             dj.dijkstra(0);
+            final long endTime = System.currentTimeMillis();
+
+            System.out.println("Total execution time: " + (endTime - startTime) );
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }
