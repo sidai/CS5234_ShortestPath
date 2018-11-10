@@ -13,9 +13,15 @@ import java.util.List;
 
 public class AdjListEntryManager {
 
-    private static int ENTRY_BLOCK_SIZE = 3200;
-    private static int NODE_SIZE = 2675656;
-    private static String DIRECTORY = "./map-data/adjacency-list/";
+//    private static int ENTRY_BLOCK_SIZE = 3200;
+//    private static int NODE_SIZE = 2675656;
+//    private static String DIRECTORY = "./map-data/adjacency-list/";
+//    private static String NAME_PATTERN = "ADJACENCY_LIST_ENTRY_[%d-%d).csv";
+
+
+    private static int ENTRY_BLOCK_SIZE = 10;
+    private static int NODE_SIZE = 27;
+    private static String DIRECTORY = "./map-data/test-list/";
     private static String NAME_PATTERN = "ADJACENCY_LIST_ENTRY_[%d-%d).csv";
 
     Map<File, AdjListEntryBlockUtil> blockMap;
@@ -46,6 +52,7 @@ public class AdjListEntryManager {
         if (!blockMap.containsKey(identifier)) {
             blockMap.put(identifier, new AdjListEntryBlockUtil());
         }
+
         return blockMap.get(identifier).readFromFile(identifier).get(nodeId);
     }
 

@@ -21,7 +21,7 @@ public class AdjListEntryBlockUtil {
 
     private Map<Integer, List<Neighbor>> adjListEntryMap;
 
-    private static final String DECODE_PATTERN = "([0-9]+),(([0-9]*[.])?[0-9]+)";
+    private static final String DECODE_PATTERN = "([0-9]+),( )*(([0-9]*[.])([0-9]+))";
     private static final String ENCODE_PATTERN = "[%d, %f]";
 
     public AdjListEntryBlockUtil() {
@@ -74,7 +74,6 @@ public class AdjListEntryBlockUtil {
     }
 
     public Map<Integer, List<Neighbor>> readFromFile(File file) throws IOException {
-
         try (Reader reader = new BufferedReader(new FileReader(file))) {
             CsvParserSettings parserSettings = new CsvParserSettings();
             parserSettings.setHeaderExtractionEnabled(true);
@@ -89,15 +88,15 @@ public class AdjListEntryBlockUtil {
 
 
     public static List<Neighbor> decodeNeighborString(String neighborString) {
+
         List<Neighbor> neighborList = new ArrayList<>();
 
         Matcher m = Pattern.compile(DECODE_PATTERN).matcher(neighborString);
-
         while (m.find()) {
             String[] neighbor = m.group().split(",");
+
             neighborList.add(new Neighbor(Integer.valueOf(neighbor[0]), Double.valueOf(neighbor[1])));
         }
-
         return neighborList;
     }
 

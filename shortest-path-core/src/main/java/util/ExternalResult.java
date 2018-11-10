@@ -18,11 +18,14 @@ import java.util.*;
 
 public class ExternalResult {
 
-    private static int ENTRY_BLOCK_SIZE = 10000;
-    private static int NODE_SIZE = 2675656;
+    //private static int ENTRY_BLOCK_SIZE = 10000;
+
     private static String DIRECTORY = "./map-data/external-result/";
     private static String NAME_PATTERN = "EXTERNAL_RESULT_[%d-%d).csv";
 
+    private static int ENTRY_BLOCK_SIZE = 10;
+
+    private int resultCount = 0;
 
     public ExternalResult() throws Exception {
         Path pathToDirectory = Paths.get(DIRECTORY);
@@ -45,6 +48,10 @@ public class ExternalResult {
     public void insertResult(int nodeId, double dist) throws Exception{
 
         insertToFile(new ResultNode(nodeId,dist));
+        resultCount+=1;
+        if(resultCount%1000==0){
+            System.out.println(resultCount);
+        }
     }
 
     //IO
@@ -91,18 +98,26 @@ public class ExternalResult {
         for(int i=0; i<nodes.size(); i++){
             ResultNode cur = nodes.get(i);
             if(cur.getNodeId() > node.getNodeId()){
+               // System.out.println("\nresult compare node id "+cur.getNodeId()+" "+node.getNodeId());
                 insertIndex = i;
                 break;
             }
         }
+        if(insertIndex<0){
+            insertIndex = nodes.size();
+        }
         nodes.add(insertIndex,node);
+//        System.out.println("insert to file");
+//        for(int i = 0; i < nodes.size(); i++) {
+//            System.out.println(nodes.get(i).getNodeId());
+//        }
 
         storeToFile(file,nodes);
     }
 
     private String getMapFileName(String pattern, int fileId) {
-        int from = fileId * ENTRY_BLOCK_SIZE +1;
-        int to = (fileId + 1) * ENTRY_BLOCK_SIZE +1;
+        int from = fileId * ENTRY_BLOCK_SIZE;
+        int to = (fileId + 1) * ENTRY_BLOCK_SIZE;
         return String.format(pattern, from, to);
     }
 
@@ -129,7 +144,7 @@ public class ExternalResult {
             file.createNewFile();
         }
 
-        try (Writer writer = new BufferedWriter(new FileWriter(file))) {
+        try (Writer writer = new BufferedWriter(new FileWriter(file, false))) {
             CsvWriterSettings settings = new CsvWriterSettings();
             settings.setQuoteAllFields(true);
             settings.setHeaderWritingEnabled(true);
@@ -140,5 +155,13 @@ public class ExternalResult {
                 csvWriter.processRecord(node);
             }
         }
+    }
+
+    public void clearAll() throws Exception{
+
+        File dir = new File(DIRECTORY);
+        for(File file: dir.listFiles())
+            if (!file.isDirectory())
+                file.delete();
     }
 }

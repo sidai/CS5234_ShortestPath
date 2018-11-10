@@ -3,17 +3,17 @@ package vo;
 import com.univocity.parsers.annotations.Headers;
 import com.univocity.parsers.annotations.Parsed;
 
-@Headers(sequence = {"id", "dist", "pqIndex"})
+@Headers(sequence = {"pqIndex", "dist", "nodeId"})
 public class PQNode implements Comparable<PQNode>
 {
     public static int EMPTY_POINTER = -1;
-    @Parsed(field = "id")
+    @Parsed
     private int nodeId;
 
     @Parsed
     private double dist;
 
-    @Parsed
+    @Parsed(field = "pqIndex")
     private int pqIndex;
 
     public PQNode() {
@@ -65,14 +65,14 @@ public class PQNode implements Comparable<PQNode>
         this.nodeId = nodeId;
     }
 
-    public int getPqIndex() { return nodeId; }
+    public int getPqIndex() { return pqIndex; }
 
     public void setPqIndex(int pqIndex) {
         this.pqIndex = pqIndex;
     }
 
     public double getDist() {
-        return nodeId;
+        return dist;
     }
 
     public void setDist(int dist) {

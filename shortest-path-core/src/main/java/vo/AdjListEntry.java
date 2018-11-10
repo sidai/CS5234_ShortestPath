@@ -12,6 +12,9 @@ public class AdjListEntry {
     @Parsed(field = "neighbors")
     private String neighborString;
 
+    public AdjListEntry() {
+    }
+
     public AdjListEntry(int nodeId, String neighborString) {
         this.nodeId = nodeId;
         this.neighborString = neighborString;

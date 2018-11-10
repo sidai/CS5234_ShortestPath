@@ -26,6 +26,10 @@ class Dijkstra {
     void dijkstra(int src) throws Exception
     {
 
+        result.clearAll();
+        pq.clearAll();
+
+
         double currentDistance = 0;
 
         pq.insert(new PQNode(src,0));
@@ -33,12 +37,20 @@ class Dijkstra {
 
         while(!pq.isEmpty()) {
 
+            PQNode nextNode = pq.pop();
+            System.out.println("pop "+nextNode.getNodeId());
+            src = nextNode.getNodeId();
+            currentDistance = nextNode.getDist();
+            result.insertResult(src, currentDistance);
+
             List<Neighbor> neighbors = manager.readAdjListEntry(src);
 
             for (Neighbor neighbor : neighbors) {
+                System.out.println("neibhgor "+neighbor.getId());
                 double distance = neighbor.getDistance() + currentDistance;
                 PQNode pqnode = new PQNode(neighbor.getId(),distance);
                 //check node already in result files
+                System.out.println("get result "+result.retrieveCost(pqnode.getNodeId()));
                 if(result.retrieveCost(pqnode.getNodeId())==-1) {
                     PQNode existNode = pq.retrieve(pqnode);
                     if (existNode != null) {
@@ -54,10 +66,6 @@ class Dijkstra {
                 }
             }
 
-            PQNode nextNode = pq.pop();
-            src = nextNode.getNodeId();
-            currentDistance = nextNode.getDist();
-            result.insertResult(src, currentDistance);
 
 
         }

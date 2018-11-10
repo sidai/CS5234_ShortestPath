@@ -18,11 +18,11 @@ import java.util.*;
 
 public class ExternalPriorityQueue {
 
-    private static int ENTRY_BLOCK_SIZE = 10000;
-    private static int NODE_SIZE = 2675656;
+    //private static int ENTRY_BLOCK_SIZE = 10000;
     private static String DIRECTORY = "./map-data/priority-queue/";
     private static String NAME_PATTERN = "EXTERNAL_PRIORITYQUEUE_ENTRY_[%d-%d).csv";
 
+    private static int ENTRY_BLOCK_SIZE = 5;
 
     private PQNode root;
     private int nodeCount = 0;
@@ -41,20 +41,26 @@ public class ExternalPriorityQueue {
         int left = left(i);
         int right = right(i);
         int smallest = -1;
-        if(left!=PQNode.EMPTY_POINTER && retrievePQNode(left).compareTo(retrievePQNode(i))<0){
-            smallest = left;
+
+        PQNode leftNode = retrievePQNode(left);
+        PQNode rightNode = retrievePQNode(right);
+        PQNode iNode = retrievePQNode(i);
+
+        PQNode smallestNode = null;
+
+        if(leftNode!=null && leftNode.compareTo(iNode)<0){
+            smallestNode = leftNode;
         }else{
-            smallest = i;
+            smallestNode = iNode;
         }
-        if(right!=PQNode.EMPTY_POINTER && retrievePQNode(right).compareTo(retrievePQNode(smallest))<0){
-            smallest = right;
+        if(rightNode!=null && rightNode.compareTo(smallestNode)<0){
+            smallestNode = rightNode;
         }
-        if(smallest!=i){
-            PQNode iNode = retrievePQNode(i);
-            PQNode smallestNode = retrievePQNode(smallest);
+
+        if(smallestNode.getPqIndex() != iNode.getPqIndex()){
             swap(iNode,smallestNode);
 
-            minHeapify(smallest);
+            minHeapify(iNode.getPqIndex());
         }
 
     }
@@ -67,10 +73,15 @@ public class ExternalPriorityQueue {
             PQNode min = root;
 
             root = removeLast();
+            if(root!= null) {
+                root.setPqIndex(0);
 
+            }
             nodeCount --;
 
-            minHeapify(0);
+            if(nodeCount>1) {
+                minHeapify(0);
+            }
 
             return min;
         }
@@ -80,8 +91,6 @@ public class ExternalPriorityQueue {
     }
 
     public void update(PQNode node) throws Exception{ // for update cost
-
-
         int parentIndex = parent(node.getPqIndex());
         PQNode parent = retrievePQNode(parentIndex);
         while(!parent.equals(node) && node.compareTo(parent)<0){
@@ -98,7 +107,7 @@ public class ExternalPriorityQueue {
     public PQNode retrieve(PQNode node) throws Exception{
         for (int i=0;i<nodeCount;i++){
             PQNode retrievedNode = retrievePQNode(i);
-            if(retrievedNode.equals(node)){
+            if(retrievedNode!=null && retrievedNode.equals(node)){
                 return retrievedNode;
             }
         }
@@ -106,8 +115,8 @@ public class ExternalPriorityQueue {
     }
 
     public void insert(PQNode node) throws Exception{
-
         node.setPqIndex(nodeCount);
+
         nodeCount++;
         if(nodeCount==1){
             root = node;
@@ -117,7 +126,7 @@ public class ExternalPriorityQueue {
         insertPQNode(node);
         int parentIndex = parent(node.getPqIndex());
         PQNode parent = retrievePQNode(parentIndex);
-        while(!parent.equals(node) && node.compareTo(parent)<0){
+        while(parent!=null && !parent.equals(node) && node.compareTo(parent)<0){
             swap(node,parent);
 
 //            parentIndex = parent.getPqIndex();
@@ -197,7 +206,15 @@ public class ExternalPriorityQueue {
    private PQNode removeLastFromFile() throws Exception{
         //only happen at the last file (last node as the new root)
        List<PQNode> nodes = retrieveWholeFile(nodeCount);
+       if(nodes.size()==0){
+           return null;
+       }
        PQNode last =nodes.remove(nodes.size()-1);
+
+       int fileId = (last.getPqIndex()-1)/ENTRY_BLOCK_SIZE;
+       File file = new File(DIRECTORY + getMapFileName(NAME_PATTERN, fileId));
+
+       storeToFile(file,nodes);
 
        return last;
    }
@@ -280,7 +297,7 @@ public class ExternalPriorityQueue {
             file.createNewFile();
         }
 
-        try (Writer writer = new BufferedWriter(new FileWriter(file))) {
+        try (Writer writer = new BufferedWriter(new FileWriter(file, false))) {
             CsvWriterSettings settings = new CsvWriterSettings();
             settings.setQuoteAllFields(true);
             settings.setHeaderWritingEnabled(true);
@@ -291,5 +308,13 @@ public class ExternalPriorityQueue {
                 csvWriter.processRecord(node);
             }
         }
+    }
+
+    public void clearAll() throws Exception{
+
+        File dir = new File(DIRECTORY);
+        for(File file: dir.listFiles())
+            if (!file.isDirectory())
+                file.delete();
     }
 }
