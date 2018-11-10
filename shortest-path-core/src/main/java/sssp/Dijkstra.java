@@ -65,7 +65,14 @@ class Dijkstra {
                     }
                 }
             }
-//            System.out.println("done neighbor");
+            if(result.resultCount%100==0){
+                System.out.println(result.resultCount+"______________");
+                System.out.println("Priority Queue Read:"+pq.IOReadCount+" Priority Queue Write:"+pq.IOWriteCount);
+                System.out.println("Result Read:"+result.IOReadCount+" Result Write:"+result.IOWriteCount);
+                System.out.println(pq.popTime+" "+pq.insertTime +" "+pq.updateTime+" "+pq.retrieveTime);
+                System.out.println(result.insertTime+" "+result.retrieveTime);
+
+            }
         }
         System.out.println("Priority Queue Read:"+pq.IOReadCount+" Priority Queue Write:"+pq.IOWriteCount);
         System.out.println("Result Read:"+result.IOReadCount+" Result Write:"+result.IOWriteCount);

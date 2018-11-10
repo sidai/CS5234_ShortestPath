@@ -25,10 +25,13 @@ public class ExternalResult {
 
 //    private static int ENTRY_BLOCK_SIZE = 10;
 
-    private int resultCount = 0;
+    public int resultCount = 0;
 
     public int IOReadCount = 0;
     public int IOWriteCount = 0;
+
+    public long insertTime = 0;
+    public long retrieveTime = 0;
 
     public ExternalResult() throws Exception {
         Path pathToDirectory = Paths.get(DIRECTORY);
@@ -39,7 +42,10 @@ public class ExternalResult {
 
 
     public double retrieveCost(int nodeId) throws Exception{
+        final long startTime = System.currentTimeMillis();
         ResultNode node =  retrieveFromFile(nodeId);
+        final long endTime = System.currentTimeMillis();
+        retrieveTime += endTime - startTime;
         if (node == null) {
 
             return -1;
@@ -49,12 +55,11 @@ public class ExternalResult {
     }
 
     public void insertResult(int nodeId, double dist) throws Exception{
-        
+        final long startTime = System.currentTimeMillis();
         insertToFile(new ResultNode(nodeId,dist));
         resultCount+=1;
-        if(resultCount%1000==0){
-            System.out.println("result count "+resultCount);
-        }
+        final long endTime = System.currentTimeMillis();
+        insertTime += endTime - startTime;
     }
 
     //IO

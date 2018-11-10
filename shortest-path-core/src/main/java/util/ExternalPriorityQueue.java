@@ -30,6 +30,11 @@ public class ExternalPriorityQueue {
     public int IOReadCount = 0;
     public int IOWriteCount = 0;
 
+    public long popTime = 0;
+    public long insertTime = 0;
+    public long updateTime = 0;
+    public long retrieveTime = 0;
+
     public ExternalPriorityQueue() throws Exception {
         Path pathToDirectory = Paths.get(DIRECTORY);
         if (!Files.exists(pathToDirectory)) {
@@ -69,6 +74,8 @@ public class ExternalPriorityQueue {
     }
 
     public PQNode pop() throws Exception{
+        final long startTime = System.currentTimeMillis();
+
         if(root == null){
             throw new IllegalStateException("queue is empty");
         }else {
@@ -85,6 +92,8 @@ public class ExternalPriorityQueue {
             if(nodeCount>1) {
                 minHeapify(0);
             }
+            final long endTime = System.currentTimeMillis();
+            popTime += endTime - startTime;
 
             return min;
         }
@@ -94,25 +103,34 @@ public class ExternalPriorityQueue {
     }
 
     public void update(PQNode node) throws Exception{ // for update cost
+        final long startTime = System.currentTimeMillis();
         int parentIndex = parent(node.getPqIndex());
         PQNode parent = retrievePQNode(parentIndex);
         while(!parent.equals(node) && node.compareTo(parent)<0){
             swap(node,parent);
             parent = retrievePQNode(parent(node.getPqIndex()));
         }
+        final long endTime = System.currentTimeMillis();
+        updateTime += endTime - startTime;
     }
 
     public PQNode retrieve(PQNode node) throws Exception{
+        final long startTime = System.currentTimeMillis();
         for (int i=0;i<nodeCount;i++){
             PQNode retrievedNode = retrievePQNode(i);
             if(retrievedNode!=null && retrievedNode.equals(node)){
+                final long endTime = System.currentTimeMillis();
+                retrieveTime += endTime - startTime;
                 return retrievedNode;
             }
         }
+        final long endTime = System.currentTimeMillis();
+        retrieveTime += endTime - startTime;
         return null;
     }
 
     public void insert(PQNode node) throws Exception{
+        final long startTime = System.currentTimeMillis();
         node.setPqIndex(nodeCount);
 
         nodeCount++;
@@ -129,6 +147,8 @@ public class ExternalPriorityQueue {
 
             parent = retrievePQNode(parent(node.getPqIndex()));
         }
+        final long endTime = System.currentTimeMillis();
+        insertTime += endTime - startTime;
     }
 
     public boolean isEmpty(){
