@@ -1,5 +1,7 @@
 target/
-map-data/
+map-data/adjacency-list/
+map-data/priority-queue/
+map-data/external-result/
 *pbf
 .idea/
 *iml
@@ -7,6 +9,4 @@ map-data/
 .classpath
 .project
 *.pdf
-shortest-path-core/src/main/java/sssp/Preprocessing.java
-shortest-path-core/src/main/java/sssp/Preprocessing.java
 shortest-path-core/src/main/java/sssp/Preprocessing.java

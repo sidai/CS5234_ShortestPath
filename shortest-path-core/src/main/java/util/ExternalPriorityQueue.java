@@ -18,14 +18,22 @@ import java.util.*;
 
 public class ExternalPriorityQueue {
 
-    private static int ENTRY_BLOCK_SIZE = 10000;
-    private static int NODE_SIZE = 2675656;
+    private static int ENTRY_BLOCK_SIZE = 10400;
     private static String DIRECTORY = "./map-data/priority-queue/";
     private static String NAME_PATTERN = "EXTERNAL_PRIORITYQUEUE_ENTRY_[%d-%d).csv";
 
+//    private static int ENTRY_BLOCK_SIZE = 5;
 
     private PQNode root;
     private int nodeCount = 0;
+
+    public int IOReadCount = 0;
+    public int IOWriteCount = 0;
+
+    public long popTime = 0;
+    public long insertTime = 0;
+    public long updateTime = 0;
+    public long retrieveTime = 0;
 
     public ExternalPriorityQueue() throws Exception {
         Path pathToDirectory = Paths.get(DIRECTORY);
@@ -41,25 +49,33 @@ public class ExternalPriorityQueue {
         int left = left(i);
         int right = right(i);
         int smallest = -1;
-        if(left!=PQNode.EMPTY_POINTER && retrievePQNode(left).compareTo(retrievePQNode(i))<0){
-            smallest = left;
+
+        PQNode leftNode = retrievePQNode(left);
+        PQNode rightNode = retrievePQNode(right);
+        PQNode iNode = retrievePQNode(i);
+
+        PQNode smallestNode = null;
+
+        if(leftNode!=null && leftNode.compareTo(iNode)<0){
+            smallestNode = leftNode;
         }else{
-            smallest = i;
+            smallestNode = iNode;
         }
-        if(right!=PQNode.EMPTY_POINTER && retrievePQNode(right).compareTo(retrievePQNode(smallest))<0){
-            smallest = right;
+        if(rightNode!=null && rightNode.compareTo(smallestNode)<0){
+            smallestNode = rightNode;
         }
-        if(smallest!=i){
-            PQNode iNode = retrievePQNode(i);
-            PQNode smallestNode = retrievePQNode(smallest);
+
+        if(smallestNode.getPqIndex() != iNode.getPqIndex()){
             swap(iNode,smallestNode);
 
-            minHeapify(smallest);
+            minHeapify(iNode.getPqIndex());
         }
 
     }
 
     public PQNode pop() throws Exception{
+        final long startTime = System.currentTimeMillis();
+
         if(root == null){
             throw new IllegalStateException("queue is empty");
         }else {
@@ -67,10 +83,17 @@ public class ExternalPriorityQueue {
             PQNode min = root;
 
             root = removeLast();
+            if(root!= null) {
+                root.setPqIndex(0);
 
+            }
             nodeCount --;
 
-            minHeapify(0);
+            if(nodeCount>1) {
+                minHeapify(0);
+            }
+            final long endTime = System.currentTimeMillis();
+            popTime += endTime - startTime;
 
             return min;
         }
@@ -80,35 +103,37 @@ public class ExternalPriorityQueue {
     }
 
     public void update(PQNode node) throws Exception{ // for update cost
-
-
+        final long startTime = System.currentTimeMillis();
         int parentIndex = parent(node.getPqIndex());
         PQNode parent = retrievePQNode(parentIndex);
         while(!parent.equals(node) && node.compareTo(parent)<0){
             swap(node,parent);
-
-//            parentIndex = parent.getPqIndex();
-//            parent.setPqIndex(node.getPqIndex());
-//            node.setPqIndex(parentIndex);
-
             parent = retrievePQNode(parent(node.getPqIndex()));
         }
+        final long endTime = System.currentTimeMillis();
+        updateTime += endTime - startTime;
     }
 
     public PQNode retrieve(PQNode node) throws Exception{
+        final long startTime = System.currentTimeMillis();
         for (int i=0;i<nodeCount;i++){
             PQNode retrievedNode = retrievePQNode(i);
-            if(retrievedNode.equals(node)){
+            if(retrievedNode!=null && retrievedNode.equals(node)){
+                final long endTime = System.currentTimeMillis();
+                retrieveTime += endTime - startTime;
                 return retrievedNode;
             }
         }
+        final long endTime = System.currentTimeMillis();
+        retrieveTime += endTime - startTime;
         return null;
     }
 
     public void insert(PQNode node) throws Exception{
-        nodeCount++;
-
+        final long startTime = System.currentTimeMillis();
         node.setPqIndex(nodeCount);
+
+        nodeCount++;
         if(nodeCount==1){
             root = node;
             return;
@@ -117,15 +142,13 @@ public class ExternalPriorityQueue {
         insertPQNode(node);
         int parentIndex = parent(node.getPqIndex());
         PQNode parent = retrievePQNode(parentIndex);
-        while(!parent.equals(node) && node.compareTo(parent)<0){
+        while(parent!=null && !parent.equals(node) && node.compareTo(parent)<0){
             swap(node,parent);
-
-//            parentIndex = parent.getPqIndex();
-//            parent.setPqIndex(node.getPqIndex());
-//            node.setPqIndex(parentIndex);
 
             parent = retrievePQNode(parent(node.getPqIndex()));
         }
+        final long endTime = System.currentTimeMillis();
+        insertTime += endTime - startTime;
     }
 
     public boolean isEmpty(){
@@ -197,7 +220,15 @@ public class ExternalPriorityQueue {
    private PQNode removeLastFromFile() throws Exception{
         //only happen at the last file (last node as the new root)
        List<PQNode> nodes = retrieveWholeFile(nodeCount);
+       if(nodes.size()==0){
+           return null;
+       }
        PQNode last =nodes.remove(nodes.size()-1);
+
+       int fileId = (last.getPqIndex()-1)/ENTRY_BLOCK_SIZE;
+       File file = new File(DIRECTORY + getMapFileName(NAME_PATTERN, fileId));
+
+       storeToFile(file,nodes);
 
        return last;
    }
@@ -237,17 +268,6 @@ public class ExternalPriorityQueue {
         return readFromFile(file);
     }
 
-//    public File getBlockIdentifier(int pqIndexId) {
-//        int fileId = getMapIdInt(pqIndexId);
-//        Assert.check(ENTRY_INDEX.containsKey(fileId), pqIndexId);
-//
-//        return ENTRY_INDEX.get(fileId);
-//    }
-//    private int getMapIdInt(int pqIndexId) {
-//        Assert.check(pqIndexId < nodeCount);
-//
-//        return (pqIndexId-1) / ENTRY_BLOCK_SIZE; //root in memory
-//    }
     private String getMapFileName(String pattern, int fileId) {
         int from = fileId * ENTRY_BLOCK_SIZE +1;
         int to = (fileId + 1) * ENTRY_BLOCK_SIZE +1;
@@ -257,7 +277,7 @@ public class ExternalPriorityQueue {
 
 //
     public List<PQNode> readFromFile(File file) throws Exception {
-
+        IOReadCount ++;
         if (!file.exists()) {
             file.createNewFile();
         }
@@ -275,12 +295,12 @@ public class ExternalPriorityQueue {
     }
 
     public void storeToFile(File file, List<PQNode> pqNodes) throws Exception {
-
+        IOWriteCount ++;
         if (!file.exists()) {
             file.createNewFile();
         }
 
-        try (Writer writer = new BufferedWriter(new FileWriter(file))) {
+        try (Writer writer = new BufferedWriter(new FileWriter(file, false))) {
             CsvWriterSettings settings = new CsvWriterSettings();
             settings.setQuoteAllFields(true);
             settings.setHeaderWritingEnabled(true);
@@ -291,5 +311,13 @@ public class ExternalPriorityQueue {
                 csvWriter.processRecord(node);
             }
         }
+    }
+
+    public void clearAll() throws Exception{
+
+        File dir = new File(DIRECTORY);
+        for(File file: dir.listFiles())
+            if (!file.isDirectory())
+                file.delete();
     }
 }

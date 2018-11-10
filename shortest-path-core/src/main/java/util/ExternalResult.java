@@ -18,11 +18,20 @@ import java.util.*;
 
 public class ExternalResult {
 
-    private static int ENTRY_BLOCK_SIZE = 10000;
-    private static int NODE_SIZE = 2675656;
+    private static int ENTRY_BLOCK_SIZE = 13867;
+
     private static String DIRECTORY = "./map-data/external-result/";
     private static String NAME_PATTERN = "EXTERNAL_RESULT_[%d-%d).csv";
 
+//    private static int ENTRY_BLOCK_SIZE = 10;
+
+    public int resultCount = 0;
+
+    public int IOReadCount = 0;
+    public int IOWriteCount = 0;
+
+    public long insertTime = 0;
+    public long retrieveTime = 0;
 
     public ExternalResult() throws Exception {
         Path pathToDirectory = Paths.get(DIRECTORY);
@@ -33,7 +42,10 @@ public class ExternalResult {
 
 
     public double retrieveCost(int nodeId) throws Exception{
+        final long startTime = System.currentTimeMillis();
         ResultNode node =  retrieveFromFile(nodeId);
+        final long endTime = System.currentTimeMillis();
+        retrieveTime += endTime - startTime;
         if (node == null) {
 
             return -1;
@@ -43,8 +55,11 @@ public class ExternalResult {
     }
 
     public void insertResult(int nodeId, double dist) throws Exception{
-
+        final long startTime = System.currentTimeMillis();
         insertToFile(new ResultNode(nodeId,dist));
+        resultCount+=1;
+        final long endTime = System.currentTimeMillis();
+        insertTime += endTime - startTime;
     }
 
     //IO
@@ -91,22 +106,31 @@ public class ExternalResult {
         for(int i=0; i<nodes.size(); i++){
             ResultNode cur = nodes.get(i);
             if(cur.getNodeId() > node.getNodeId()){
+               // System.out.println("\nresult compare node id "+cur.getNodeId()+" "+node.getNodeId());
                 insertIndex = i;
                 break;
             }
         }
+        if(insertIndex<0){
+            insertIndex = nodes.size();
+        }
         nodes.add(insertIndex,node);
+//        System.out.println("insert to file");
+//        for(int i = 0; i < nodes.size(); i++) {
+//            System.out.println(nodes.get(i).getNodeId());
+//        }
 
         storeToFile(file,nodes);
     }
 
     private String getMapFileName(String pattern, int fileId) {
-        int from = fileId * ENTRY_BLOCK_SIZE +1;
-        int to = (fileId + 1) * ENTRY_BLOCK_SIZE +1;
+        int from = fileId * ENTRY_BLOCK_SIZE;
+        int to = (fileId + 1) * ENTRY_BLOCK_SIZE;
         return String.format(pattern, from, to);
     }
 
     public List<ResultNode> readFromFile(File file) throws Exception {
+        IOReadCount++;
         if (!file.exists()) {
             file.createNewFile();
         }
@@ -125,11 +149,12 @@ public class ExternalResult {
 
 
     public void storeToFile(File file, List<ResultNode> resultNodes) throws Exception {
+        IOWriteCount++;
         if (!file.exists()) {
             file.createNewFile();
         }
 
-        try (Writer writer = new BufferedWriter(new FileWriter(file))) {
+        try (Writer writer = new BufferedWriter(new FileWriter(file, false))) {
             CsvWriterSettings settings = new CsvWriterSettings();
             settings.setQuoteAllFields(true);
             settings.setHeaderWritingEnabled(true);
@@ -140,5 +165,13 @@ public class ExternalResult {
                 csvWriter.processRecord(node);
             }
         }
+    }
+
+    public void clearAll() throws Exception{
+
+        File dir = new File(DIRECTORY);
+        for(File file: dir.listFiles())
+            if (!file.isDirectory())
+                file.delete();
     }
 }

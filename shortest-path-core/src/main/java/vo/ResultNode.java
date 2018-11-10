@@ -32,10 +32,10 @@ public class ResultNode
     }
 
     public double getDist() {
-        return nodeId;
+        return dist;
     }
 
-    public void setDist(int dist) {
+    public void setDist(double dist) {
         this.dist = dist;
     }
 }
