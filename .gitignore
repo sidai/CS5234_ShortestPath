@@ -1,5 +1,7 @@
 target/
-map-data/
+map-data/adjacency-list/
+map-data/priority-queue/
+map-data/external-result/
 *pbf
 .idea/
 *iml
