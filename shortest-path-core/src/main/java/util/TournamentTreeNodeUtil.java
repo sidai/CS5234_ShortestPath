@@ -33,9 +33,41 @@ public class TournamentTreeNodeUtil {
     public TournamentTreeNodeUtil(File fileName) {
         this.fileName = fileName;
     }
+    public boolean isFull(){
+        return elements.size()>=ConfigManager.getMemorySize();
+    }
+    public boolean addElement(TournamentNode element){
+        if(!isFull()){
+            elementsRef.put(element.getNodeId(), element);
+            elements.add(element);
+            return true;
+        }
+        return false;
+    }
+
+    public String getFileName(){return fileName.getName();}
+
+    public Map<Integer, TournamentNode> getElementsRef() {
+        return elementsRef;
+    }
+    public TreeSet<TournamentNode> getElements() {
+        return elements;
+    }
+    public void setElementsRef(Map<Integer,TournamentNode> elementsRef){
+        this.elementsRef = elementsRef;
+        this.elements = new TreeSet<>(elementsRef.values());
+    }
+
+    public Map<Integer, OperationNode> getBuffer() {
+        return buffer;
+    }
+    public void setBuffer(Map<Integer, OperationNode> buffer){
+        this.buffer = buffer;
+    }
+
 
     // for root node only
-    public TournamentNode extractMin() {
+    public TournamentNode extractMin() throws Exception{
         if (elements.isEmpty()) {
             TournamentFileManager.fillup(this);
         }
@@ -44,7 +76,7 @@ public class TournamentTreeNodeUtil {
         return root;
     }
 
-    public TournamentNode findMin() {
+    public TournamentNode findMin() throws Exception{
         if (elements.isEmpty()) {
             TournamentFileManager.fillup(this);
         }
@@ -52,12 +84,12 @@ public class TournamentTreeNodeUtil {
     }
 
     // findMin must be called before any deleteMin so that the elements is loaded.
-    public void deleteMin() {
+    public void deleteMin() throws Exception{
         TournamentNode root = elements.pollFirst();
         bufferDeleteOp(root.getNodeId());
     }
 
-    public void updateDistance(int id, double dist) {
+    public void updateDistance(int id, double dist) throws Exception{
         // elements contains the node, replace if dist decreases
         if (elementsRef.containsKey(id)) {
             TournamentNode duplicate = elementsRef.get(id);
@@ -82,7 +114,7 @@ public class TournamentTreeNodeUtil {
         }
     }
 
-    private void bufferUpdateOp(int id, double dist) {
+    private void bufferUpdateOp(int id, double dist) throws Exception{
         if (buffer.containsKey(id)) {
             OperationNode op = buffer.get(id);
             // ignore when exists DELETE (only extractMin can delete) or UPDATE with smaller value
@@ -97,7 +129,7 @@ public class TournamentTreeNodeUtil {
         }
     }
 
-    public void deleteElement(int id) {
+    public void deleteElement(int id) throws Exception{
         if (elementsRef.containsKey(id)) {
             elements.remove(elementsRef.get(id));
         }
@@ -105,7 +137,7 @@ public class TournamentTreeNodeUtil {
     }
 
 
-    private void bufferDeleteOp(int id) {
+    private void bufferDeleteOp(int id) throws Exception{
         // replace with DELETE operation
         buffer.put(id, new OperationNode(OpType.DELETE, id));
         if (buffer.size() == ConfigManager.getMemorySize()) {

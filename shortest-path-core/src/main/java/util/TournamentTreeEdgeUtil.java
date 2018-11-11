@@ -38,9 +38,41 @@ public class TournamentTreeEdgeUtil {
         elementsRef = new HashMap<>();
         buffer = new HashMap<>();
     }
+    public boolean isFull(){
+        return elements.size()>=ConfigManager.getMemorySize();
+    }
+    public boolean addElement(TournamentEdge element){
+        if(!isFull()){
+            elementsRef.put(new Pair<Integer, Integer>(element.getFromNode(),element.getToNode()), element);
+            elements.add(element);
+            return true;
+        }
+        return false;
+    }
+
+    public String getFileName(){return fileName.getName();}
+
+    public Map<Pair<Integer, Integer>, TournamentEdge> getElementsRef() {
+        return elementsRef;
+    }
+    public TreeSet<TournamentEdge> getElements() {
+        return elements;
+    }
+    public void setElementsRef(Map<Pair<Integer, Integer>, TournamentEdge> elementsRef){
+        this.elementsRef = elementsRef;
+        this.elements = new TreeSet<>(elementsRef.values());
+    }
+
+    public Map<Pair<Integer, Integer>, OperationEdge> getBuffer() {
+        return buffer;
+    }
+    public void setBuffer(Map<Pair<Integer, Integer>, OperationEdge> buffer){
+        this.buffer = buffer;
+    }
+
 
     // for root node only
-    public TournamentEdge extractMin() {
+    public TournamentEdge extractMin() throws Exception{
         if (elements.isEmpty()) {
             TournamentFileManager.fillup(this);
         }
@@ -49,7 +81,7 @@ public class TournamentTreeEdgeUtil {
         return root;
     }
 
-    public TournamentEdge findMin() {
+    public TournamentEdge findMin() throws Exception{
         if (elements.isEmpty()) {
             TournamentFileManager.fillup(this);
         }
@@ -57,12 +89,12 @@ public class TournamentTreeEdgeUtil {
     }
 
     // findMin must be called before any deleteMin so that the elements is loaded.
-    public void deleteMin() {
+    public void deleteMin() throws Exception{
         TournamentEdge root = elements.pollFirst();
         bufferDeleteOp(root.getFromNode(), root.getToNode());
     }
 
-    public void updateDistance(int fromNode, int toNode, double dist) {
+    public void updateDistance(int fromNode, int toNode, double dist) throws Exception{
         // elements contains the node, replace if dist decreases
         Pair<Integer, Integer> key = new Pair<>(fromNode, toNode);
         if (elementsRef.containsKey(key)) {
@@ -88,7 +120,7 @@ public class TournamentTreeEdgeUtil {
         }
     }
 
-    private void bufferUpdateOp(int fromNode, int toNode, double dist) {
+    private void bufferUpdateOp(int fromNode, int toNode, double dist) throws Exception{
         Pair<Integer, Integer> key = new Pair<>(fromNode, toNode);
         if (buffer.containsKey(key)) {
             OperationEdge op = buffer.get(key);
@@ -104,7 +136,7 @@ public class TournamentTreeEdgeUtil {
         }
     }
 
-    public void deleteElement(int fromNode, int toNode) {
+    public void deleteElement(int fromNode, int toNode) throws Exception{
         Pair<Integer, Integer> key = new Pair<>(fromNode, toNode);
         if (elementsRef.containsKey(key)) {
             elements.remove(elementsRef.get(key));
@@ -113,7 +145,7 @@ public class TournamentTreeEdgeUtil {
     }
 
 
-    private void bufferDeleteOp(int fromNode, int toNode) {
+    private void bufferDeleteOp(int fromNode, int toNode) throws Exception{
         // replace with DELETE operation
         buffer.put(new Pair<>(fromNode, toNode), new OperationEdge(OpType.DELETE, fromNode, toNode));
         if (buffer.size() == ConfigManager.getMemorySize()) {
