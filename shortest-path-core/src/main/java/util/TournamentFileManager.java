@@ -230,12 +230,22 @@ public class TournamentFileManager {
         List<TournamentNode> leftElements = new ArrayList<>(leftChild.getElements());
         List<TournamentNode> rightElements = new ArrayList<>(rightChild.getElements());
         if(leftElements.size()==0){
-            fillup(leftChild);
-            leftElements = new ArrayList<>(leftChild.getElements());
+            String[] range = leftChild.getFileName().split(".")[0].split("-");
+            int start = Integer.parseInt(range[0]);
+            int end = Integer.parseInt(range[1]);
+            if(end-start > ENTRY_BLOCK_SIZE) {
+                fillup(leftChild);
+                leftElements = new ArrayList<>(leftChild.getElements());
+            }
         }
         if(rightElements.size()==0){
-            fillup(rightChild);
-            rightElements = new ArrayList<>(rightChild.getElements());
+            String[] range = rightChild.getFileName().split(".")[0].split("-");
+            int start = Integer.parseInt(range[0]);
+            int end = Integer.parseInt(range[1]);
+            if(end-start > ENTRY_BLOCK_SIZE) {
+                fillup(rightChild);
+                rightElements = new ArrayList<>(rightChild.getElements());
+            }
         }
         while (isNotFull){
             if(leftPointer < leftElements.size() && rightPointer < rightElements.size()) {
@@ -277,12 +287,22 @@ public class TournamentFileManager {
         List<TournamentEdge> leftElements = new ArrayList<>(leftChild.getElements());
         List<TournamentEdge> rightElements = new ArrayList<>(rightChild.getElements());
         if(leftElements.size()==0){
-            fillup(leftChild);
-            leftElements = new ArrayList<>(leftChild.getElements());
+            String[] range = leftChild.getFileName().split(".")[0].split("-");
+            int start = Integer.parseInt(range[0]);
+            int end = Integer.parseInt(range[1]);
+            if(end-start > ENTRY_BLOCK_SIZE) {
+                fillup(leftChild);
+                leftElements = new ArrayList<>(leftChild.getElements());
+            }
         }
         if(rightElements.size()==0){
-            fillup(rightChild);
-            rightElements = new ArrayList<>(rightChild.getElements());
+            String[] range = rightChild.getFileName().split(".")[0].split("-");
+            int start = Integer.parseInt(range[0]);
+            int end = Integer.parseInt(range[1]);
+            if(end-start > ENTRY_BLOCK_SIZE) {
+                fillup(rightChild);
+                rightElements = new ArrayList<>(rightChild.getElements());
+            }
         }
         while (isNotFull){
             if(leftPointer < leftElements.size() && rightPointer < rightElements.size()) {
