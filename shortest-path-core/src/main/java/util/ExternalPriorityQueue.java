@@ -35,6 +35,10 @@ public class ExternalPriorityQueue {
     public long updateTime = 0;
     public long retrieveTime = 0;
 
+    private int bufStart = -1;
+    private int bufEnd = -1;
+    private List<PQNode> bufs = new ArrayList<>();
+
     public ExternalPriorityQueue() throws Exception {
         Path pathToDirectory = Paths.get(DIRECTORY);
         if (!Files.exists(pathToDirectory)) {
@@ -67,7 +71,7 @@ public class ExternalPriorityQueue {
 
         if(smallestNode.getPqIndex() != iNode.getPqIndex()){
             swap(iNode,smallestNode);
-
+            //System.out.println("heapify "+iNode.getPqIndex());
             minHeapify(iNode.getPqIndex());
         }
 
@@ -79,7 +83,9 @@ public class ExternalPriorityQueue {
         if(root == null){
             throw new IllegalStateException("queue is empty");
         }else {
-
+//            if(nodeCount>104) {
+//                System.out.println("queue count " + nodeCount);
+//            }
             PQNode min = root;
 
             root = removeLast();
@@ -159,19 +165,23 @@ public class ExternalPriorityQueue {
     private void swap(PQNode child, PQNode parent) throws Exception{
         int childPQIndex = child.getPqIndex();
         int parentPQIndex = parent.getPqIndex();
-        child.setPqIndex(parentPQIndex);
-        parent.setPqIndex(childPQIndex);
 
-        if(child.getPqIndex() == 0){
-            root = child;
-        }else{
+        parent.setPqIndex(childPQIndex);
+        child.setPqIndex(parentPQIndex);
+
+        if(parentPQIndex != 0){
             updateToFile(child);
-        }
-        if(parent.getPqIndex() == 0){
-            root = parent;
         }else{
-            updateToFile(parent);
+            root = child;
         }
+        if(childPQIndex != 0){
+            updateToFile(parent);
+        }else{
+            root = parent;
+        }
+
+
+
     }
 
     private PQNode retrievePQNode(int i) throws Exception{
@@ -214,40 +224,37 @@ public class ExternalPriorityQueue {
        List<PQNode> nodes = retrieveWholeFile(node.getPqIndex());
        nodes.add(node);
 
-       storeToFile(file,nodes);
+       storeToFile(file,nodes, false);
    }
 
    private PQNode removeLastFromFile() throws Exception{
         //only happen at the last file (last node as the new root)
-       List<PQNode> nodes = retrieveWholeFile(nodeCount);
+       List<PQNode> nodes = retrieveWholeFile(nodeCount-1);
        if(nodes.size()==0){
            return null;
        }
        PQNode last =nodes.remove(nodes.size()-1);
 
+
+
        int fileId = (last.getPqIndex()-1)/ENTRY_BLOCK_SIZE;
        File file = new File(DIRECTORY + getMapFileName(NAME_PATTERN, fileId));
 
-       storeToFile(file,nodes);
+       storeToFile(file,nodes, false);
 
        return last;
    }
 
    private void updateToFile(PQNode node) throws Exception{
         // update node distance
+       //System.out.println("update to file "+node.getNodeId()+" "+node.getPqIndex()+" "+newPQIndex);
        List<PQNode> nodes = retrieveWholeFile(node.getPqIndex());
-       int replaceIndex = -1;
-       for(int i=0; i<nodes.size(); i++) {
-           PQNode cur = nodes.get(i);
-           if(cur.getPqIndex() == node.getPqIndex()){
-               replaceIndex = i;
-               break;
-           }
-       }
+       int replaceIndex = node.getPqIndex()-bufStart;
+
        nodes.set(replaceIndex,node);
        int fileId = (node.getPqIndex()-1)/ENTRY_BLOCK_SIZE;
        File file = new File(DIRECTORY + getMapFileName(NAME_PATTERN, fileId));
-       storeToFile(file,nodes);
+       storeToFile(file,nodes, false);
    }
 
 
@@ -263,9 +270,7 @@ public class ExternalPriorityQueue {
    }
 
     private List<PQNode> retrieveWholeFile(int pqIndex) throws Exception{
-        int fileId = (pqIndex-1)/ENTRY_BLOCK_SIZE;
-        File file = new File(DIRECTORY + getMapFileName(NAME_PATTERN, fileId));
-        return readFromFile(file);
+        return readFromFile(pqIndex);
     }
 
     private String getMapFileName(String pattern, int fileId) {
@@ -276,7 +281,26 @@ public class ExternalPriorityQueue {
 
 
 //
-    public List<PQNode> readFromFile(File file) throws Exception {
+    public List<PQNode> readFromFile(int pdIndex) throws Exception {
+        if(bufStart<=pdIndex && bufEnd>pdIndex){
+//            if(bufs.size()>0){
+//                System.out.println(bufStart+" "+bufEnd+ "read buf "+bufs.get(0).getPqIndex()+" "+ bufs.get(0).getNodeId());
+//            }
+            return bufs;
+        }
+        else{
+            File file = new File(DIRECTORY + String.format(NAME_PATTERN, bufStart, bufEnd));
+            storeToFile(file, bufs,true);
+        }
+
+
+        int fileId = (pdIndex-1)/ENTRY_BLOCK_SIZE;
+        int from = fileId * ENTRY_BLOCK_SIZE +1;
+        int to = (fileId + 1) * ENTRY_BLOCK_SIZE +1;
+        File file = new File(DIRECTORY + String.format(NAME_PATTERN, from, to));
+        bufStart=from;
+        bufEnd=to;
+
         IOReadCount ++;
         if (!file.exists()) {
             file.createNewFile();
@@ -288,18 +312,28 @@ public class ExternalPriorityQueue {
             BeanListProcessor<PQNode> processor = new BeanListProcessor<>(PQNode.class);
             parserSettings.setProcessor(processor);
             CsvParser parser = new CsvParser(parserSettings);
-
             parser.parse(reader);
-            return processor.getBeans();
+            bufs = processor.getBeans();
+//            if(bufs.size()>0){
+//                System.out.println("new buf "+bufs.get(0).getPqIndex()+" "+ bufs.get(0).getNodeId());
+//            }
+            return bufs;
         }
     }
 
-    public void storeToFile(File file, List<PQNode> pqNodes) throws Exception {
-        IOWriteCount ++;
+    public void storeToFile(File file, List<PQNode> pqNodes, boolean force) throws Exception {
+        bufs = pqNodes;
+
         if (!file.exists()) {
             file.createNewFile();
         }
-
+        if(bufs.size() < ENTRY_BLOCK_SIZE && !force){
+            return;
+        }
+        IOWriteCount ++;
+//        if(bufs.size()>0){
+//            System.out.println("store buf "+bufs.get(0).getPqIndex()+" "+ bufs.get(0).getNodeId());
+//        }
         try (Writer writer = new BufferedWriter(new FileWriter(file, false))) {
             CsvWriterSettings settings = new CsvWriterSettings();
             settings.setQuoteAllFields(true);
