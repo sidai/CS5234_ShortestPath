@@ -83,7 +83,9 @@ public class ExternalPriorityQueue {
         if(root == null){
             throw new IllegalStateException("queue is empty");
         }else {
-
+//            if(nodeCount>104) {
+//                System.out.println("queue count " + nodeCount);
+//            }
             PQNode min = root;
 
             root = removeLast();
@@ -227,7 +229,7 @@ public class ExternalPriorityQueue {
 
    private PQNode removeLastFromFile() throws Exception{
         //only happen at the last file (last node as the new root)
-       List<PQNode> nodes = retrieveWholeFile(nodeCount);
+       List<PQNode> nodes = retrieveWholeFile(nodeCount-1);
        if(nodes.size()==0){
            return null;
        }
