@@ -25,7 +25,6 @@ class Dijkstra {
 
     void dijkstra(int src) throws Exception
     {
-
         result.clearAll();
         pq.clearAll();
 

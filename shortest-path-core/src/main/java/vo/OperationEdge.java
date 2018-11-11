@@ -4,28 +4,33 @@ import com.univocity.parsers.annotations.EnumOptions;
 import com.univocity.parsers.annotations.Headers;
 import com.univocity.parsers.annotations.Parsed;
 
-@Headers(sequence = {"operation", "id", "value"})
-public class OperationNode {
+@Headers(sequence = {"operation", "from_node, to_node", "value"})
+public class OperationEdge {
 
     @Parsed
     @EnumOptions(customElement = "typeCode")
     private OpType operation;
 
-    @Parsed
-    private int id;
+    @Parsed(field = "from_node")
+    private int fromNode;
+
+    @Parsed(field = "to_node")
+    private int toNode;
 
     @Parsed
     private Double value;
 
-    public OperationNode(OpType operation, int id) {
+    public OperationEdge(OpType operation, int fromNode, int toNode) {
         this.operation = operation;
-        this.id = id;
+        this.fromNode = fromNode;
+        this.toNode = toNode;
         this.value = 0.0;
     }
 
-    public OperationNode(OpType operation, int id, double value) {
+    public OperationEdge(OpType operation, int fromNode, int toNode, double value) {
         this.operation = operation;
-        this.id = id;
+        this.fromNode = fromNode;
+        this.toNode = toNode;
         this.value = value;
     }
 
@@ -37,19 +42,27 @@ public class OperationNode {
         this.operation = operation;
     }
 
-    public int getId() {
-        return id;
+    public int getFromNode() {
+        return fromNode;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setFromNode(int fromNode) {
+        this.fromNode = fromNode;
     }
 
-    public double getValue() {
+    public int getToNode() {
+        return toNode;
+    }
+
+    public void setToNode(int toNode) {
+        this.toNode = toNode;
+    }
+
+    public Double getValue() {
         return value;
     }
 
-    public void setValue(double value) {
+    public void setValue(Double value) {
         this.value = value;
     }
 

@@ -4,8 +4,7 @@ import com.univocity.parsers.annotations.Headers;
 import com.univocity.parsers.annotations.Parsed;
 
 @Headers(sequence = {"id", "dist"})
-public class TournamentNode implements Comparable<TournamentNode>
-{
+public class TournamentNode implements Comparable<TournamentNode> {
     @Parsed(field = "id")
     private int nodeId;
 

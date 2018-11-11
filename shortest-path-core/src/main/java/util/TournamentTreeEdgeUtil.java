@@ -6,9 +6,10 @@ import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 import com.univocity.parsers.csv.CsvWriter;
 import com.univocity.parsers.csv.CsvWriterSettings;
-import vo.OperationNode;
-import vo.TournamentNode;
-import vo.OperationNode.OpType;
+import javafx.util.Pair;
+import vo.OperationEdge;
+import vo.OperationEdge.OpType;
+import vo.TournamentEdge;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -19,32 +20,36 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-public class TournamentTreeNodeUtil {
+public class TournamentTreeEdgeUtil {
 
     private File fileName;
-    private TreeSet<TournamentNode> elements;
-    private Map<Integer, TournamentNode> elementsRef;
-    private Map<Integer, OperationNode> buffer;
+    private TreeSet<TournamentEdge> elements;
+    private Map<Pair<Integer, Integer>, TournamentEdge> elementsRef;
+    private Map<Pair<Integer, Integer>, OperationEdge> buffer;
 
-    public TournamentTreeNodeUtil(File fileName) {
+    public TournamentTreeEdgeUtil(File fileName) {
         this.fileName = fileName;
+        elements = new TreeSet<>();
+        elementsRef = new HashMap<>();
+        buffer = new HashMap<>();
     }
 
     // for root node only
-    public TournamentNode extractMin() {
+    public TournamentEdge extractMin() {
         if (elements.isEmpty()) {
             TournamentFileManager.fillup(this);
         }
-        TournamentNode root = elements.pollFirst();
-        bufferDeleteOp(root.getNodeId());
+        TournamentEdge root = elements.pollFirst();
+        bufferDeleteOp(root.getFromNode(), root.getToNode());
         return root;
     }
 
-    public TournamentNode findMin() {
+    public TournamentEdge findMin() {
         if (elements.isEmpty()) {
             TournamentFileManager.fillup(this);
         }
@@ -53,14 +58,15 @@ public class TournamentTreeNodeUtil {
 
     // findMin must be called before any deleteMin so that the elements is loaded.
     public void deleteMin() {
-        TournamentNode root = elements.pollFirst();
-        bufferDeleteOp(root.getNodeId());
+        TournamentEdge root = elements.pollFirst();
+        bufferDeleteOp(root.getFromNode(), root.getToNode());
     }
 
-    public void updateDistance(int id, double dist) {
+    public void updateDistance(int fromNode, int toNode, double dist) {
         // elements contains the node, replace if dist decreases
-        if (elementsRef.containsKey(id)) {
-            TournamentNode duplicate = elementsRef.get(id);
+        Pair<Integer, Integer> key = new Pair<>(fromNode, toNode);
+        if (elementsRef.containsKey(key)) {
+            TournamentEdge duplicate = elementsRef.get(key);
             if(duplicate.getDist() > dist) {
                 duplicate.setDist(dist);
             }
@@ -69,45 +75,47 @@ public class TournamentTreeNodeUtil {
         //elements doesn't contain the node, check if need to insert into elements.
         else {
             if (elements.last().getDist() >= dist) {
-                TournamentNode node = new TournamentNode(id, dist);
+                TournamentEdge node = new TournamentEdge(fromNode, toNode, dist);
                 elements.add(node);
-                elementsRef.put(id, node);
+                elementsRef.put(key, node);
                 if (elements.size() > ConfigManager.getMemorySize()) {
-                    TournamentNode toBuffer = elements.pollLast();
-                    bufferUpdateOp(toBuffer.getNodeId(), toBuffer.getDist());
+                    TournamentEdge toBuffer = elements.pollLast();
+                    bufferUpdateOp(toBuffer.getFromNode(), toBuffer.getToNode(), toBuffer.getDist());
                 }
             } else {
-                bufferUpdateOp(id, dist);
+                bufferUpdateOp(fromNode, toNode, dist);
             }
         }
     }
 
-    private void bufferUpdateOp(int id, double dist) {
-        if (buffer.containsKey(id)) {
-            OperationNode op = buffer.get(id);
+    private void bufferUpdateOp(int fromNode, int toNode, double dist) {
+        Pair<Integer, Integer> key = new Pair<>(fromNode, toNode);
+        if (buffer.containsKey(key)) {
+            OperationEdge op = buffer.get(key);
             // ignore when exists DELETE (only extractMin can delete) or UPDATE with smaller value
             if (op.getOperation().equals(OpType.UPDATE) && op.getValue() > dist) {
                 op.setValue(dist);
             }
         } else {
-            buffer.put(id, new OperationNode(OpType.UPDATE, id, dist));
+            buffer.put(key, new OperationEdge(OpType.UPDATE, fromNode, toNode, dist));
             if (buffer.size() == ConfigManager.getMemorySize()) {
                 TournamentFileManager.empty(this);
             }
         }
     }
 
-    public void deleteElement(int id) {
-        if (elementsRef.containsKey(id)) {
-            elements.remove(elementsRef.get(id));
+    public void deleteElement(int fromNode, int toNode) {
+        Pair<Integer, Integer> key = new Pair<>(fromNode, toNode);
+        if (elementsRef.containsKey(key)) {
+            elements.remove(elementsRef.get(key));
         }
-        bufferDeleteOp(id);
+        bufferDeleteOp(fromNode, toNode);
     }
 
 
-    private void bufferDeleteOp(int id) {
+    private void bufferDeleteOp(int fromNode, int toNode) {
         // replace with DELETE operation
-        buffer.put(id, new OperationNode(OpType.DELETE, id));
+        buffer.put(new Pair<>(fromNode, toNode), new OperationEdge(OpType.DELETE, fromNode, toNode));
         if (buffer.size() == ConfigManager.getMemorySize()) {
             TournamentFileManager.empty(this);
         }
@@ -121,16 +129,16 @@ public class TournamentTreeNodeUtil {
             csvWriter.writeRowToString(String.valueOf(elements.size()), String.valueOf(buffer.size()));
 
             //write elements
-            RowWriterProcessor<TournamentNode> elementsProcessor = new BeanWriterProcessor<>(TournamentNode.class);
+            RowWriterProcessor<TournamentEdge> elementsProcessor = new BeanWriterProcessor<>(TournamentEdge.class);
             settings.setRowWriterProcessor(elementsProcessor);
-            for(TournamentNode node: elements) {
+            for(TournamentEdge node: elements) {
                 csvWriter.processRecordToString(node);
             }
 
             //write nodes
-            RowWriterProcessor<OperationNode> operationProcessor = new BeanWriterProcessor<>(OperationNode.class);
+            RowWriterProcessor<OperationEdge> operationProcessor = new BeanWriterProcessor<>(OperationEdge.class);
             settings.setRowWriterProcessor(operationProcessor);
-            for(OperationNode node: buffer.values()) {
+            for(OperationEdge node: buffer.values()) {
                 csvWriter.processRecordToString(node);
             }
         }
@@ -143,25 +151,27 @@ public class TournamentTreeNodeUtil {
             String[] count = parser.parseNext();
 
             String[] nodeString;
-            List<TournamentNode> elements = new ArrayList<>();
+            List<TournamentEdge> elements = new ArrayList<>();
             for (int i = 0; i < Integer.parseInt(count[0]); i++) {
                 nodeString = parser.parseNext();
-                int id = Integer.parseInt(nodeString[0]);
-                double dist = Double.parseDouble(nodeString[1]);
-                TournamentNode node = new TournamentNode(id, dist);
+                int fromNode = Integer.parseInt(nodeString[0]);
+                int toNode = Integer.parseInt(nodeString[1]);
+                double dist = Double.parseDouble(nodeString[2]);
+                TournamentEdge node = new TournamentEdge(fromNode, toNode, dist);
                 elements.add(node);
-                elementsRef.put(id, node);
+                elementsRef.put(new Pair<>(fromNode, toNode), node);
             }
             this.elements.addAll(elements);
 
             for (int i = 0; i < Integer.parseInt(count[1]); i++) {
                 nodeString = parser.parseNext();
-                int id = Integer.parseInt(nodeString[1]);
-                double dist = Double.parseDouble(nodeString[2]);
                 OpType type = OpType.valueOf(nodeString[0]);
-                OperationNode node = new OperationNode(type, id, dist);
+                int fromNode = Integer.parseInt(nodeString[1]);
+                int toNode = Integer.parseInt(nodeString[2]);
+                double dist = Double.parseDouble(nodeString[3]);
+                OperationEdge node = new OperationEdge(type, fromNode, toNode, dist);
 
-                buffer.put(id, node);
+                buffer.put(new Pair<>(fromNode, toNode), node);
             }
         }
     }

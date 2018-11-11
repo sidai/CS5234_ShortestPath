@@ -168,7 +168,6 @@ public class ExternalResult {
     }
 
     public void clearAll() throws Exception{
-
         File dir = new File(DIRECTORY);
         for(File file: dir.listFiles())
             if (!file.isDirectory())
