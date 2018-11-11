@@ -28,6 +28,12 @@ public class TournamentFileManager {
     private static String NODE_DIRECTORY = "./map-data/node-pq/";
     private static String RANGE_PATTERN = "%d-%d.csv";
 
+    public static int IOEdgeReadCount = 0;
+    public static int IOEdgeWriteCount = 0;
+
+    public static int IONodeReadCount = 0;
+    public static int IONodeWriteCount = 0;
+
 
     public static void initialize() throws IOException {
         Path pathToFile = Paths.get(EDGE_DIRECTORY);
@@ -131,6 +137,7 @@ public class TournamentFileManager {
             rightTNode.setBuffer(rightOperations);
 
             tNode.storeToFile();
+            IONodeWriteCount++;
 
             if(leftTNode.isFull()){
                 empty(leftTNode);
@@ -141,7 +148,7 @@ public class TournamentFileManager {
 
             leftTNode.storeToFile();
             rightTNode.storeToFile();
-
+            IONodeWriteCount+=2;
         }
 
     }
@@ -195,6 +202,7 @@ public class TournamentFileManager {
             rightTNode.setBuffer(rightOperations);
 
             tEdge.storeToFile();
+            IOEdgeWriteCount++;
 
             if(leftTNode.isFull()){
                 empty(leftTNode);
@@ -205,6 +213,7 @@ public class TournamentFileManager {
 
             leftTNode.storeToFile();
             rightTNode.storeToFile();
+            IOEdgeWriteCount+=2;
 
         }
     }
@@ -245,6 +254,7 @@ public class TournamentFileManager {
 
         }
         tNode.storeToFile();
+        IONodeWriteCount++;
     }
 
     public static void fillup(TournamentTreeEdgeUtil tEdge) throws Exception{
@@ -283,6 +293,7 @@ public class TournamentFileManager {
 
         }
         tEdge.storeToFile();
+        IOEdgeWriteCount++;
     }
 
     private static TournamentTreeNodeUtil getLeftChild(TournamentTreeNodeUtil tNode) throws Exception{
@@ -298,6 +309,7 @@ public class TournamentFileManager {
         TournamentTreeNodeUtil leftTNode = new TournamentTreeNodeUtil(file);
         if (file.exists()) {
             leftTNode.readFromFile();
+            IONodeReadCount++;
         }
 
         return leftTNode;
@@ -316,6 +328,7 @@ public class TournamentFileManager {
         TournamentTreeNodeUtil rightTNode = new TournamentTreeNodeUtil(file);
         if (file.exists()) {
             rightTNode.readFromFile();
+            IONodeReadCount++;
         }
 
         return rightTNode;
@@ -334,6 +347,7 @@ public class TournamentFileManager {
         TournamentTreeEdgeUtil leftTNode = new TournamentTreeEdgeUtil(file);
         if (file.exists()) {
             leftTNode.readFromFile();
+            IOEdgeReadCount++;
         }
 
         return leftTNode;
@@ -352,6 +366,7 @@ public class TournamentFileManager {
         TournamentTreeEdgeUtil rightTNode = new TournamentTreeEdgeUtil(file);
         if (file.exists()) {
             rightTNode.readFromFile();
+            IOEdgeReadCount++;
         }
 
         return rightTNode;
