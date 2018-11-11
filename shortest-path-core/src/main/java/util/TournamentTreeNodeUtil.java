@@ -18,10 +18,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
 public class TournamentTreeNodeUtil {
 
@@ -32,6 +29,9 @@ public class TournamentTreeNodeUtil {
 
     public TournamentTreeNodeUtil(File fileName) {
         this.fileName = fileName;
+        elements = new TreeSet<>();
+        elementsRef = new HashMap<>();
+        buffer = new HashMap<>();
     }
     public boolean isFull(){
         return elements.size()>=ConfigManager.getMemorySize();

@@ -106,11 +106,11 @@ public class TournamentFileManager {
             int rightStart = leftEnd;
             int rightEnd = end;
 
-            Map<Integer, TournamentNode> leftElements = new HashMap<>();
-            Map<Integer, TournamentNode> rightElements = new HashMap<>();
+            Map<Integer, TournamentNode> leftElements = leftTNode.getElementsRef();
+            Map<Integer, TournamentNode> rightElements = rightTNode.getElementsRef();
 
-            Map<Integer, OperationNode> leftOperations = new HashMap<>();
-            Map<Integer, OperationNode> rightOperations = new HashMap<>();
+            Map<Integer, OperationNode> leftOperations = leftTNode.getBuffer();
+            Map<Integer, OperationNode> rightOperations = rightTNode.getBuffer();
 
             for(Map.Entry<Integer, TournamentNode> entry: elements.entrySet()){
                 if(entry.getKey()<leftEnd){
@@ -171,11 +171,11 @@ public class TournamentFileManager {
             int rightStart = leftEnd;
             int rightEnd = end;
 
-            Map<Pair<Integer, Integer>, TournamentEdge> leftElements = new HashMap<>();
-            Map<Pair<Integer, Integer>, TournamentEdge> rightElements = new HashMap<>();
+            Map<Pair<Integer, Integer>, TournamentEdge> leftElements = leftTNode.getElementsRef();
+            Map<Pair<Integer, Integer>, TournamentEdge> rightElements = rightTNode.getElementsRef();
 
-            Map<Pair<Integer, Integer>, OperationEdge> leftOperations = new HashMap<>();
-            Map<Pair<Integer, Integer>, OperationEdge> rightOperations = new HashMap<>();
+            Map<Pair<Integer, Integer>, OperationEdge> leftOperations = leftTNode.getBuffer();
+            Map<Pair<Integer, Integer>, OperationEdge> rightOperations = rightTNode.getBuffer();
 
             for(Map.Entry<Pair<Integer, Integer>, TournamentEdge> entry: elements.entrySet()){
                 if(entry.getKey().getKey()<leftEnd){
