@@ -229,6 +229,14 @@ public class TournamentFileManager {
         int rightPointer = 0;
         List<TournamentNode> leftElements = new ArrayList<>(leftChild.getElements());
         List<TournamentNode> rightElements = new ArrayList<>(rightChild.getElements());
+        if(leftElements.size()==0){
+            fillup(leftChild);
+            leftElements = new ArrayList<>(leftChild.getElements());
+        }
+        if(rightElements.size()==0){
+            fillup(rightChild);
+            rightElements = new ArrayList<>(rightChild.getElements());
+        }
         while (isNotFull){
             if(leftPointer < leftElements.size() && rightPointer < rightElements.size()) {
                 TournamentNode left = leftElements.get(leftPointer);
@@ -268,6 +276,14 @@ public class TournamentFileManager {
         int rightPointer = 0;
         List<TournamentEdge> leftElements = new ArrayList<>(leftChild.getElements());
         List<TournamentEdge> rightElements = new ArrayList<>(rightChild.getElements());
+        if(leftElements.size()==0){
+            fillup(leftChild);
+            leftElements = new ArrayList<>(leftChild.getElements());
+        }
+        if(rightElements.size()==0){
+            fillup(rightChild);
+            rightElements = new ArrayList<>(rightChild.getElements());
+        }
         while (isNotFull){
             if(leftPointer < leftElements.size() && rightPointer < rightElements.size()) {
                 TournamentEdge left = leftElements.get(leftPointer);
