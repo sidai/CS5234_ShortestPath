@@ -22,6 +22,8 @@ public class TournamentFileManager {
     private static String EDGE_DIRECTORY = "./map-data/edge-pq/";
     private static String NODE_DIRECTORY = "./map-data/node-pq/";
     private static String RANGE_PATTERN = "%d-%d.txt";
+    private static int IOReadCount;
+    private static int IOWriteCount;
 
 
     public static void initialize() throws IOException {
@@ -91,48 +93,11 @@ public class TournamentFileManager {
 
     }
 
+    public static int getIOReadCount() {
+        return IOReadCount;
+    }
 
-
-    public static class AdjListEntryIndex {
-        private Map<Integer, File> ENTRY_INDEX;
-
-        public AdjListEntryIndex() {
-            ENTRY_INDEX = new HashMap<>();
-        }
-
-        public File getBlockIdentifier(int nodeId) {
-            int fileId = getMapIdInt(nodeId);
-            Assert.check(ENTRY_INDEX.containsKey(fileId), nodeId);
-
-            return ENTRY_INDEX.get(fileId);
-        }
-
-        public void initEntryIndex(int nodeSize, int entryBlockSize, String directory, String pattern) throws Exception {
-
-            Path pathToDirectory = Paths.get(directory);
-            if (!Files.exists(pathToDirectory)) {
-                Files.createDirectories(pathToDirectory);
-            }
-
-            for (int fileId = 0; fileId <= Math.ceil(nodeSize / entryBlockSize); fileId++) {
-                File file = new File(directory + getMapFileName(pattern, fileId));
-                if (!file.exists()) {
-                    file.createNewFile();
-                }
-                ENTRY_INDEX.put(fileId, file);
-            }
-        }
-
-        private int getMapIdInt(int nodeId) {
-            Assert.check(nodeId < NODE_SIZE);
-
-            return nodeId / ENTRY_BLOCK_SIZE;
-        }
-
-        private String getMapFileName(String pattern, int fileId) {
-            int from = fileId * ENTRY_BLOCK_SIZE;
-            int to = (fileId + 1) * ENTRY_BLOCK_SIZE;
-            return String.format(pattern, from, to);
-        }
+    public static int getIOWriteCount() {
+        return IOWriteCount;
     }
 }
