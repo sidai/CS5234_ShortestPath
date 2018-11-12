@@ -15,7 +15,7 @@ public class AdjListEntryManager {
 
     private static int ENTRY_BLOCK_SIZE = 3200;
     private static int NODE_SIZE = 2675656;
-    private static String DIRECTORY = "./map-data/adjacency-list/";
+    private static String DIRECTORY = "./../map-data/adjacency-list/";
     private static String NAME_PATTERN = "ADJACENCY_LIST_ENTRY_[%d-%d).csv";
 
 //
@@ -31,6 +31,15 @@ public class AdjListEntryManager {
         blockMap = new HashMap<>();
         adjListEntryIndex = new AdjListEntryIndex();
         adjListEntryIndex.initEntryIndex(NODE_SIZE, ENTRY_BLOCK_SIZE, DIRECTORY, NAME_PATTERN);
+    }
+
+    public void clearAll() {
+        File dir = new File(DIRECTORY);
+        for (File file : dir.listFiles()) {
+            if (!file.isDirectory()) {
+                file.delete();
+            }
+        }
     }
 
     public void addNeighbor(int nodeId, Neighbor neighbor) {

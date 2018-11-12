@@ -39,30 +39,86 @@ public class TournamentTreeEdgeUtil {
         buffer = new HashMap<>();
     }
 
-    // for root node only
-    public TournamentEdge extractMin() {
-        if (elements.isEmpty()) {
-            TournamentFileManager.fillup(this);
-        }
-        TournamentEdge root = elements.pollFirst();
-        bufferDeleteOp(root.getFromNode(), root.getToNode());
-        return root;
+    public boolean isFull(){
+        return elements.size()>=ConfigManager.getMemorySize();
     }
 
-    public TournamentEdge findMin() {
+    public boolean addElement(TournamentEdge element){
+
+        elementsRef.put(new Pair<>(element.getFromNode(),element.getToNode()), element);
+        elements.add(element);
+
+        return isFull();
+    }
+
+    public String getFileName() {
+        return fileName.getName();
+    }
+
+    public Map<Pair<Integer, Integer>, TournamentEdge> getElementsRef() {
+        return elementsRef;
+    }
+
+    public TreeSet<TournamentEdge> getElements() {
+        return elements;
+    }
+
+    public void setElementsRef(Map<Pair<Integer, Integer>, TournamentEdge> elementsRef){
+        this.elementsRef = elementsRef;
+        this.elements = new TreeSet<>(elementsRef.values());
+    }
+
+    public Map<Pair<Integer, Integer>, OperationEdge> getBuffer() {
+        return buffer;
+    }
+
+    public void executeOp(OperationEdge op) throws Exception {
+        if(OpType.DELETE.equals(op.getOperation())) {
+            deleteElement(op.getFromNode(), op.getToNode());
+        } else {
+            updateDistance(op.getFromNode(), op.getToNode(), op.getValue());
+        }
+    }
+
+    public void commitOp(OperationEdge op) throws Exception {
+        Pair<Integer, Integer> key = new Pair<>(op.getFromNode(), op.getToNode());
+        if (elementsRef.containsKey(key)) {
+            TournamentEdge edge = elementsRef.get(key);
+            if (OpType.DELETE.equals(op.getOperation())) {
+                elements.remove(elementsRef.remove(key));
+            } else if (OpType.UPDATE.equals(op.getOperation())) {
+                if (edge.getDist() > op.getValue()) {
+                    edge.setDist(op.getValue());
+                }
+            }
+        } else {
+            if (OpType.UPDATE.equals(op.getOperation())) {
+                TournamentEdge edge = new TournamentEdge(op.getFromNode(), op.getToNode(), op.getValue());
+                elements.add(edge);
+                elementsRef.put(key, edge);
+            }
+        }
+    }
+
+    public void setBuffer(Map<Pair<Integer, Integer>, OperationEdge> buffer){
+        this.buffer = buffer;
+    }
+
+    public TournamentEdge findMin() throws Exception{
         if (elements.isEmpty()) {
             TournamentFileManager.fillup(this);
         }
-        return elements.first();
+        return elements.isEmpty() ? null : elements.first();
     }
 
     // findMin must be called before any deleteMin so that the elements is loaded.
-    public void deleteMin() {
+    public void deleteMin() throws Exception{
         TournamentEdge root = elements.pollFirst();
+        elementsRef.remove(new Pair<>(root.getFromNode(), root.getToNode()));
         bufferDeleteOp(root.getFromNode(), root.getToNode());
     }
 
-    public void updateDistance(int fromNode, int toNode, double dist) {
+    public void updateDistance(int fromNode, int toNode, double dist) throws Exception{
         // elements contains the node, replace if dist decreases
         Pair<Integer, Integer> key = new Pair<>(fromNode, toNode);
         if (elementsRef.containsKey(key)) {
@@ -74,12 +130,13 @@ public class TournamentTreeEdgeUtil {
 
         //elements doesn't contain the node, check if need to insert into elements.
         else {
-            if (elements.last().getDist() >= dist) {
+            if (!elements.isEmpty() &&  elements.last().getDist() >= dist) {
                 TournamentEdge node = new TournamentEdge(fromNode, toNode, dist);
                 elements.add(node);
                 elementsRef.put(key, node);
                 if (elements.size() > ConfigManager.getMemorySize()) {
                     TournamentEdge toBuffer = elements.pollLast();
+                    elementsRef.remove(new Pair<>(toBuffer.getFromNode(), toBuffer.getToNode()));
                     bufferUpdateOp(toBuffer.getFromNode(), toBuffer.getToNode(), toBuffer.getDist());
                 }
             } else {
@@ -88,7 +145,7 @@ public class TournamentTreeEdgeUtil {
         }
     }
 
-    private void bufferUpdateOp(int fromNode, int toNode, double dist) {
+    private void bufferUpdateOp(int fromNode, int toNode, double dist) throws Exception{
         Pair<Integer, Integer> key = new Pair<>(fromNode, toNode);
         if (buffer.containsKey(key)) {
             OperationEdge op = buffer.get(key);
@@ -104,7 +161,7 @@ public class TournamentTreeEdgeUtil {
         }
     }
 
-    public void deleteElement(int fromNode, int toNode) {
+    public void deleteElement(int fromNode, int toNode) throws Exception{
         Pair<Integer, Integer> key = new Pair<>(fromNode, toNode);
         if (elementsRef.containsKey(key)) {
             elements.remove(elementsRef.get(key));
@@ -113,7 +170,7 @@ public class TournamentTreeEdgeUtil {
     }
 
 
-    private void bufferDeleteOp(int fromNode, int toNode) {
+    private void bufferDeleteOp(int fromNode, int toNode) throws Exception{
         // replace with DELETE operation
         buffer.put(new Pair<>(fromNode, toNode), new OperationEdge(OpType.DELETE, fromNode, toNode));
         if (buffer.size() == ConfigManager.getMemorySize()) {
@@ -125,12 +182,12 @@ public class TournamentTreeEdgeUtil {
         try (Writer writer = new BufferedWriter((new FileWriter(fileName)))) {
             CsvWriterSettings settings = new CsvWriterSettings();
             settings.setQuoteAllFields(true);
-            CsvWriter csvWriter = new CsvWriter(writer, settings);
-            csvWriter.writeRowToString(String.valueOf(elements.size()), String.valueOf(buffer.size()));
-
             //write elements
             RowWriterProcessor<TournamentEdge> elementsProcessor = new BeanWriterProcessor<>(TournamentEdge.class);
             settings.setRowWriterProcessor(elementsProcessor);
+            CsvWriter csvWriter = new CsvWriter(writer, settings);
+            csvWriter.writeRowToString(String.valueOf(elements.size()), String.valueOf(buffer.size()));
+
             for(TournamentEdge node: elements) {
                 csvWriter.processRecordToString(node);
             }
@@ -138,6 +195,7 @@ public class TournamentTreeEdgeUtil {
             //write nodes
             RowWriterProcessor<OperationEdge> operationProcessor = new BeanWriterProcessor<>(OperationEdge.class);
             settings.setRowWriterProcessor(operationProcessor);
+            csvWriter = new CsvWriter(writer, settings);
             for(OperationEdge node: buffer.values()) {
                 csvWriter.processRecordToString(node);
             }
@@ -148,10 +206,13 @@ public class TournamentTreeEdgeUtil {
         try (Reader reader = new BufferedReader(new FileReader(fileName))) {
             CsvParserSettings parserSettings = new CsvParserSettings();
             CsvParser parser = new CsvParser(parserSettings);
+            parser.beginParsing(reader);
             String[] count = parser.parseNext();
 
             String[] nodeString;
             List<TournamentEdge> elements = new ArrayList<>();
+            System.out.println(fileName);
+            System.out.println(count);
             for (int i = 0; i < Integer.parseInt(count[0]); i++) {
                 nodeString = parser.parseNext();
                 int fromNode = Integer.parseInt(nodeString[0]);

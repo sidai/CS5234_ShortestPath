@@ -15,8 +15,9 @@ public class CacheEfficientDijkstra {
         adjListManager = new AdjListEntryManager();
     }
 
-    void dijkstra(int src, int dest) throws Exception {
+    public void dijkstra(int src, int dest) throws Exception {
         TournamentFileManager.clearAll();
+        adjListManager.clearAll();
         double currentDistance = 0.0;
 
         TournamentFileManager.updateDistance(src, src, currentDistance);
@@ -42,7 +43,8 @@ public class CacheEfficientDijkstra {
         }
     }
 
-    void printResult() {
-        System.out.println("Priority Queue Read:"+TournamentFileManager.getIOReadCount()+" Priority Queue Write:"+TournamentFileManager.getIOWriteCount());
+    private void printResult() {
+        System.out.println("Priority Queue Read:"+TournamentFileManager.IOEdgeReadCount+" Priority Queue Write:"+TournamentFileManager.IOEdgeWriteCount);
+        System.out.println("Priority Queue Read:"+TournamentFileManager.IONodeReadCount+" Priority Queue Write:"+TournamentFileManager.IONodeWriteCount);
     }
 }
