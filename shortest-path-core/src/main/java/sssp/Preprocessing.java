@@ -22,7 +22,7 @@ public class Preprocessing {
         try {
 //            parseOSMMap();
 //            prepareEdgeList();
-//            prepareAdjList();
+            prepareAdjList();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -40,7 +40,6 @@ public class Preprocessing {
             int to = Integer.valueOf(lines[1]);
             double dist = Double.valueOf(lines[2]);
             manager.addNeighbor(from, new Neighbor(to, dist));
-
         }
         manager.storeAllBlock();
         System.out.println(manager.getBlockMap().size());
@@ -48,8 +47,8 @@ public class Preprocessing {
 
     private void prepareEdgeList() throws Exception {
         EdgeUtil edgeUtil = new EdgeUtil();
-        String edgeCSV =  "./map-data/graph/edge.csv";
-        String edgeStoreCSV = "./map-data/sorted-graph/edge.csv";
+        String edgeCSV =  "./../map-data/graph/edge.csv";
+        String edgeStoreCSV = "./../map-data/sorted-graph/edge.csv";
 
         CSVReader reader = new CSVReader(new FileReader(edgeCSV));
         reader.readNext();

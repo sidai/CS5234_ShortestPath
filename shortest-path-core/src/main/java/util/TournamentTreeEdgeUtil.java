@@ -1,7 +1,5 @@
 package util;
 
-import com.univocity.parsers.common.processor.BeanWriterProcessor;
-import com.univocity.parsers.common.processor.RowWriterProcessor;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 import com.univocity.parsers.csv.CsvWriter;
@@ -20,6 +18,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -182,37 +181,27 @@ public class TournamentTreeEdgeUtil {
         try (Writer writer = new BufferedWriter((new FileWriter(fileName)))) {
             CsvWriterSettings settings = new CsvWriterSettings();
             settings.setQuoteAllFields(true);
-            //write elements
-            RowWriterProcessor<TournamentEdge> elementsProcessor = new BeanWriterProcessor<>(TournamentEdge.class);
-            settings.setRowWriterProcessor(elementsProcessor);
             CsvWriter csvWriter = new CsvWriter(writer, settings);
-            csvWriter.writeRowToString(String.valueOf(elements.size()), String.valueOf(buffer.size()));
+            csvWriter.writeRow(String.valueOf(elements.size()), String.valueOf(buffer.size()));
 
             for(TournamentEdge node: elements) {
-                csvWriter.processRecordToString(node);
+                csvWriter.writeRow(node.getString());
             }
 
-            //write nodes
-            RowWriterProcessor<OperationEdge> operationProcessor = new BeanWriterProcessor<>(OperationEdge.class);
-            settings.setRowWriterProcessor(operationProcessor);
-            csvWriter = new CsvWriter(writer, settings);
             for(OperationEdge node: buffer.values()) {
-                csvWriter.processRecordToString(node);
+                csvWriter.writeRow(node.getString());
             }
         }
     }
 
     public void readFromFile() throws IOException {
         try (Reader reader = new BufferedReader(new FileReader(fileName))) {
-            CsvParserSettings parserSettings = new CsvParserSettings();
-            CsvParser parser = new CsvParser(parserSettings);
+            CsvParser parser = new CsvParser(new CsvParserSettings());
             parser.beginParsing(reader);
             String[] count = parser.parseNext();
 
             String[] nodeString;
             List<TournamentEdge> elements = new ArrayList<>();
-            System.out.println(fileName);
-            System.out.println(count);
             for (int i = 0; i < Integer.parseInt(count[0]); i++) {
                 nodeString = parser.parseNext();
                 int fromNode = Integer.parseInt(nodeString[0]);

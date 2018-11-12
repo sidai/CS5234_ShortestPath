@@ -53,6 +53,10 @@ public class OperationNode {
         this.value = value;
     }
 
+    public String[] getString() {
+        return new String[]{String.valueOf(operation), String.valueOf(id), String.valueOf(value)};
+    }
+
     public enum OpType {
         UPDATE('U'),
         DELETE('D');

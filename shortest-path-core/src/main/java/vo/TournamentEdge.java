@@ -3,6 +3,8 @@ package vo;
 import com.univocity.parsers.annotations.Headers;
 import com.univocity.parsers.annotations.Parsed;
 
+import java.util.Arrays;
+
 @Headers(sequence = {"from_node", "to_node", "dist"})
 public class TournamentEdge implements Comparable<TournamentEdge> {
     @Parsed(field = "from_node")
@@ -69,5 +71,9 @@ public class TournamentEdge implements Comparable<TournamentEdge> {
 
     public void setDist(double dist) {
         this.dist = dist;
+    }
+
+    public String[] getString() {
+        return new String[]{String.valueOf(fromNode), String.valueOf(toNode), String.valueOf(dist)};
     }
 }

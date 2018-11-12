@@ -170,22 +170,15 @@ public class TournamentTreeNodeUtil {
         try (Writer writer = new BufferedWriter((new FileWriter(fileName)))) {
             CsvWriterSettings settings = new CsvWriterSettings();
             settings.setQuoteAllFields(true);
-            //write elements
-            RowWriterProcessor<TournamentNode> elementsProcessor = new BeanWriterProcessor<>(TournamentNode.class);
-            settings.setRowWriterProcessor(elementsProcessor);
             CsvWriter csvWriter = new CsvWriter(writer, settings);
-            csvWriter.writeRowToString(String.valueOf(elements.size()), String.valueOf(buffer.size()));
+            csvWriter.writeRow(String.valueOf(elements.size()), String.valueOf(buffer.size()));
 
             for(TournamentNode node: elements) {
-                csvWriter.processRecordToString(node);
+                csvWriter.writeRow(node.getString());
             }
 
-            //write nodes
-            RowWriterProcessor<OperationNode> operationProcessor = new BeanWriterProcessor<>(OperationNode.class);
-            settings.setRowWriterProcessor(operationProcessor);
-            csvWriter = new CsvWriter(writer, settings);
             for(OperationNode node: buffer.values()) {
-                csvWriter.processRecordToString(node);
+                csvWriter.writeRow(node.getString());
             }
         }
     }

@@ -66,6 +66,10 @@ public class OperationEdge {
         this.value = value;
     }
 
+    public String[] getString() {
+        return new String[]{String.valueOf(operation), String.valueOf(fromNode), String.valueOf(toNode), String.valueOf(value)};
+    }
+
     public enum OpType {
         UPDATE('U'),
         DELETE('D');

@@ -55,10 +55,14 @@ public class TournamentNode implements Comparable<TournamentNode> {
     }
 
     public double getDist() {
-        return nodeId;
+        return dist;
     }
 
     public void setDist(double dist) {
         this.dist = dist;
+    }
+
+    public String[] getString() {
+        return new String[]{String.valueOf(nodeId), String.valueOf(dist)};
     }
 }

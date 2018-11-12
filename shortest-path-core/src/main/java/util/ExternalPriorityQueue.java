@@ -286,12 +286,12 @@ public class ExternalPriorityQueue {
 //            if(bufs.size()>0){
 //                System.out.println(bufStart+" "+bufEnd+ "read buf "+bufs.get(0).getPqIndex()+" "+ bufs.get(0).getNodeId());
 //            }
-            return bufs;
+            //return bufs;
         }
-        else{
-            File file = new File(DIRECTORY + String.format(NAME_PATTERN, bufStart, bufEnd));
-            storeToFile(file, bufs,true);
-        }
+//        else{
+//            File file = new File(DIRECTORY + String.format(NAME_PATTERN, bufStart, bufEnd));
+//            storeToFile(file, bufs,true);
+//        }
 
 
         int fileId = (pdIndex-1)/ENTRY_BLOCK_SIZE;
@@ -327,9 +327,9 @@ public class ExternalPriorityQueue {
         if (!file.exists()) {
             file.createNewFile();
         }
-        if(bufs.size() < ENTRY_BLOCK_SIZE && !force){
-            return;
-        }
+//        if(bufs.size() < ENTRY_BLOCK_SIZE && !force){
+//            return;
+//        }
         IOWriteCount ++;
 //        if(bufs.size()>0){
 //            System.out.println("store buf "+bufs.get(0).getPqIndex()+" "+ bufs.get(0).getNodeId());
