@@ -37,6 +37,7 @@ public class CacheEfficientDijkstra {
             result.add(new Pair(src, currentDistance));
             System.out.println(src + ", " + currentDistance);
             if (src == dest) {
+                System.out.println("total node: " + count);
                 printResult();
                 break;
             }

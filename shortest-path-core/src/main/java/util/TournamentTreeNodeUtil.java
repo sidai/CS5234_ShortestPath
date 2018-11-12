@@ -1,7 +1,5 @@
 package util;
 
-import com.univocity.parsers.common.processor.BeanWriterProcessor;
-import com.univocity.parsers.common.processor.RowWriterProcessor;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 import com.univocity.parsers.csv.CsvWriter;
@@ -22,16 +20,26 @@ import java.util.*;
 
 public class TournamentTreeNodeUtil {
 
-    private File fileName;
+    private File file;
     private TreeSet<TournamentNode> elements;
     private Map<Integer, TournamentNode> elementsRef;
     private Map<Integer, OperationNode> buffer;
+    private double minAmongChild;
 
-    public TournamentTreeNodeUtil(File fileName) {
-        this.fileName = fileName;
+    public TournamentTreeNodeUtil(File file) {
+        this.file = file;
         elements = new TreeSet<>();
         elementsRef = new HashMap<>();
         buffer = new HashMap<>();
+        minAmongChild = Double.MAX_VALUE;
+    }
+
+    public void init() throws Exception {
+        file.createNewFile();
+    }
+
+    public void resetMinAmongChild() {
+        this.minAmongChild = elements.isEmpty() ? Double.MAX_VALUE : elements.last().getDist();
     }
 
     public void executeOp(OperationNode op) throws Exception {
@@ -71,8 +79,8 @@ public class TournamentTreeNodeUtil {
         return isFull();
     }
 
-    public String getFileName() {
-        return fileName.getName();
+    public File getFile() {
+        return file;
     }
 
     public Map<Integer, TournamentNode> getElementsRef() {
@@ -120,7 +128,7 @@ public class TournamentTreeNodeUtil {
 
         //elements doesn't contain the node, check if need to insert into elements.
         else {
-            if (!elements.isEmpty() && elements.last().getDist() >= dist) {
+            if (minAmongChild >= dist) {
                 TournamentNode node = new TournamentNode(id, dist);
                 elements.add(node);
                 elementsRef.put(id, node);
@@ -167,11 +175,11 @@ public class TournamentTreeNodeUtil {
     }
 
     public void storeToFile() throws IOException {
-        try (Writer writer = new BufferedWriter((new FileWriter(fileName)))) {
+        try (Writer writer = new BufferedWriter((new FileWriter(file)))) {
             CsvWriterSettings settings = new CsvWriterSettings();
             settings.setQuoteAllFields(true);
             CsvWriter csvWriter = new CsvWriter(writer, settings);
-            csvWriter.writeRow(String.valueOf(elements.size()), String.valueOf(buffer.size()));
+            csvWriter.writeRow(String.valueOf(elements.size()), String.valueOf(buffer.size()), String.valueOf(minAmongChild));
 
             for(TournamentNode node: elements) {
                 csvWriter.writeRow(node.getString());
@@ -184,11 +192,13 @@ public class TournamentTreeNodeUtil {
     }
 
     public void readFromFile() throws IOException {
-        try (Reader reader = new BufferedReader(new FileReader(fileName))) {
+        try (Reader reader = new BufferedReader(new FileReader(file))) {
             CsvParserSettings parserSettings = new CsvParserSettings();
             CsvParser parser = new CsvParser(parserSettings);
             parser.beginParsing(reader);
             String[] count = parser.parseNext();
+
+            minAmongChild = Double.parseDouble(count[2]);
 
             String[] nodeString;
             List<TournamentNode> elements = new ArrayList<>();

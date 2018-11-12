@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,16 +25,26 @@ import java.util.TreeSet;
 
 public class TournamentTreeEdgeUtil {
 
-    private File fileName;
+    private File file;
     private TreeSet<TournamentEdge> elements;
     private Map<Pair<Integer, Integer>, TournamentEdge> elementsRef;
     private Map<Pair<Integer, Integer>, OperationEdge> buffer;
+    private double minAmongChild;
 
-    public TournamentTreeEdgeUtil(File fileName) {
-        this.fileName = fileName;
+    public TournamentTreeEdgeUtil(File file) {
+        this.file = file;
         elements = new TreeSet<>();
         elementsRef = new HashMap<>();
         buffer = new HashMap<>();
+        minAmongChild = Double.MAX_VALUE;
+    }
+    
+    public void init() throws Exception {
+        file.createNewFile();
+    }
+
+    public void resetMinAmongChild() {
+        this.minAmongChild = elements.isEmpty() ? Double.MAX_VALUE : elements.last().getDist();
     }
 
     public boolean isFull(){
@@ -43,15 +52,13 @@ public class TournamentTreeEdgeUtil {
     }
 
     public boolean addElement(TournamentEdge element){
-
         elementsRef.put(new Pair<>(element.getFromNode(),element.getToNode()), element);
         elements.add(element);
-
         return isFull();
     }
 
-    public String getFileName() {
-        return fileName.getName();
+    public File getFile() {
+        return file;
     }
 
     public Map<Pair<Integer, Integer>, TournamentEdge> getElementsRef() {
@@ -129,7 +136,7 @@ public class TournamentTreeEdgeUtil {
 
         //elements doesn't contain the node, check if need to insert into elements.
         else {
-            if (!elements.isEmpty() &&  elements.last().getDist() >= dist) {
+            if (minAmongChild >= dist) {
                 TournamentEdge node = new TournamentEdge(fromNode, toNode, dist);
                 elements.add(node);
                 elementsRef.put(key, node);
@@ -178,7 +185,7 @@ public class TournamentTreeEdgeUtil {
     }
 
     public void storeToFile() throws IOException {
-        try (Writer writer = new BufferedWriter((new FileWriter(fileName)))) {
+        try (Writer writer = new BufferedWriter((new FileWriter(file)))) {
             CsvWriterSettings settings = new CsvWriterSettings();
             settings.setQuoteAllFields(true);
             CsvWriter csvWriter = new CsvWriter(writer, settings);
@@ -195,10 +202,12 @@ public class TournamentTreeEdgeUtil {
     }
 
     public void readFromFile() throws IOException {
-        try (Reader reader = new BufferedReader(new FileReader(fileName))) {
+        try (Reader reader = new BufferedReader(new FileReader(file))) {
             CsvParser parser = new CsvParser(new CsvParserSettings());
             parser.beginParsing(reader);
             String[] count = parser.parseNext();
+
+            minAmongChild = Double.parseDouble(count[2]);
 
             String[] nodeString;
             List<TournamentEdge> elements = new ArrayList<>();
