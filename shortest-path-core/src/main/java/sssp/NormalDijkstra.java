@@ -18,23 +18,36 @@ import util.Pair;
 
 
 public class NormalDijkstra {
+    private static String DIRECTORY_NOCACHE = "./map-data/external-result/";
+    private static String DIRECTORY_CACHE = "./map-data/external-result-cache/";
+
     PrintWriter pr;
     ExternalResult result;
     ExternalPriorityQueue pq;
     public NormalDijkstra() throws Exception {
-        pq = new ExternalPriorityQueue();
-        result = new ExternalResult();
+
+    }
+
+    public void dijkstra(boolean cache, int src, int dest, boolean isDest, List<Integer> reportPoints) throws Exception
+    {
         String path = "./map-data/result/normal.txt";
+        if(cache){
+            path = "./map-data/result/normal_cache.txt";
+        }
         Path pathToFile = Paths.get(path);
         if(!Files.exists(pathToFile)) {
             Files.createDirectories(pathToFile.getParent());
             Files.createFile(pathToFile);
         }
         pr = new PrintWriter(new BufferedWriter(new FileWriter(path)));
-    }
 
-    public void dijkstra(int src, int dest, boolean isDest, List<Integer> reportPoints) throws Exception
-    {
+        System.out.println("start diajkstra cache["+cache+"]--------------------------");
+        pq = new ExternalPriorityQueue(cache);
+        String dir = DIRECTORY_NOCACHE;
+        if(cache){
+            dir = DIRECTORY_CACHE;
+        }
+        result = new ExternalResult(dir);
         long start = System.currentTimeMillis();
         List<Pair<Integer, Double>> resultInMemory = new LinkedList<>();
         result.clearAll();
@@ -68,9 +81,6 @@ public class NormalDijkstra {
             for (Neighbor neighbor : neighbors) {
 //                pr.println("neibhgor "+neighbor.getId());
                 double distance = neighbor.getDistance() + currentDistance;
-                if(neighbor.getId()==1801674){
-                    int a=-1;
-                }
                 PQNode pqnode = new PQNode(neighbor.getId(),distance);
                 //check node already in result files
 //                pr.println("get result "+result.retrieveCost(pqnode.getNodeId()));

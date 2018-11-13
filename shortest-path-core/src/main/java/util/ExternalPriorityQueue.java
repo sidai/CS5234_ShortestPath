@@ -18,7 +18,7 @@ import java.util.*;
 
 public class ExternalPriorityQueue {
 
-    private static int ENTRY_BLOCK_SIZE = 10400;
+    private static int ENTRY_BLOCK_SIZE = ConfigManager.getMemorySize();
     private static String DIRECTORY = "./map-data/priority-queue/";
     private static String NAME_PATTERN = "EXTERNAL_PRIORITYQUEUE_ENTRY_[%d-%d).csv";
 
@@ -38,13 +38,15 @@ public class ExternalPriorityQueue {
     private int bufStart = -1;
     private int bufEnd = -1;
     private List<PQNode> bufs = new ArrayList<>();
+    private boolean cacheEnabled = false;
 
-    public ExternalPriorityQueue() throws Exception {
+    public ExternalPriorityQueue(boolean cacheEnabled) throws Exception {
         Path pathToDirectory = Paths.get(DIRECTORY);
         if (!Files.exists(pathToDirectory)) {
             Files.createDirectories(pathToDirectory);
         }
         this.root = null;
+        this.cacheEnabled = cacheEnabled;
     }
 
 
@@ -290,16 +292,14 @@ public class ExternalPriorityQueue {
 
 //
     public List<PQNode> readFromFile(int pdIndex) throws Exception {
-        if(bufStart<=pdIndex && bufEnd>pdIndex){
-//            if(bufs.size()>0){
-//                System.out.println(bufStart+" "+bufEnd+ "read buf "+bufs.get(0).getPqIndex()+" "+ bufs.get(0).getNodeId());
-//            }
-            //return bufs;
+        if(cacheEnabled) {
+            if (bufStart <= pdIndex && bufEnd > pdIndex) {
+                return bufs;
+            } else {
+                File file = new File(DIRECTORY + String.format(NAME_PATTERN, bufStart, bufEnd));
+                storeToFile(file, bufs, true);
+            }
         }
-//        else{
-//            File file = new File(DIRECTORY + String.format(NAME_PATTERN, bufStart, bufEnd));
-//            storeToFile(file, bufs,true);
-//        }
 
 
         int fileId = (pdIndex-1)/ENTRY_BLOCK_SIZE;
@@ -335,9 +335,12 @@ public class ExternalPriorityQueue {
         if (!file.exists()) {
             file.createNewFile();
         }
-//        if(bufs.size() < ENTRY_BLOCK_SIZE && !force){
-//            return;
-//        }
+        if(cacheEnabled){
+            if(bufs.size() < ENTRY_BLOCK_SIZE && !force){
+                return;
+            }
+        }
+
         IOWriteCount ++;
 //        if(bufs.size()>0){
 //            System.out.println("store buf "+bufs.get(0).getPqIndex()+" "+ bufs.get(0).getNodeId());
