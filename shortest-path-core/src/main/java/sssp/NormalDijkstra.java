@@ -8,27 +8,25 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+
+import util.AdjListManager;
 import util.ExternalResult;
-import util.AdjListEntryManager;
 import util.ExternalPriorityQueue;
 import vo.Neighbor;
 import vo.PQNode;
-import vo.TournamentNode;
 import util.Pair;
 
 
 public class NormalDijkstra {
 
     long start = System.currentTimeMillis();
-    AdjListEntryManager manager;
     PrintWriter pr;
     ExternalResult result;
     ExternalPriorityQueue pq;
     public NormalDijkstra() throws Exception {
-        manager = new AdjListEntryManager();
         pq = new ExternalPriorityQueue();
         result = new ExternalResult();
-        String path = "./../map-data/result/normal.txt";
+        String path = "./map-data/result/normal.txt";
         Path pathToFile = Paths.get(path);
         if(!Files.exists(pathToFile)) {
             Files.createDirectories(pathToFile.getParent());
@@ -67,7 +65,7 @@ public class NormalDijkstra {
             }
             result.insertResult(src, currentDistance);
 
-            List<Neighbor> neighbors = manager.readAdjListEntry(src);
+            List<Neighbor> neighbors = AdjListManager.readAdjListEntry(src);
 
             for (Neighbor neighbor : neighbors) {
 //                pr.println("neibhgor "+neighbor.getId());
@@ -115,5 +113,6 @@ public class NormalDijkstra {
         for(Pair p: resultInMemory) {
             pr.println(p.getKey() + ", " + p.getValue());
         }
+        pr.close();
     }
 }

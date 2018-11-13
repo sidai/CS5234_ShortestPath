@@ -10,9 +10,9 @@ public class DijkstraTest {
         DijkstraTest test = new DijkstraTest();
         String edgeCSV = "./map-data/sorted-graph/edge.csv";
         AdjListManager.loadFromFile(edgeCSV);
-//        test.testDijkstra();
-        test.testInMemoryDijkstra();
-//        test.testNormalDijkstra();
+        test.testDijkstra();
+//        test.testInMemoryDijkstra();
+        test.testNormalDijkstra();
     }
 
     public void testDijkstra() throws Exception {

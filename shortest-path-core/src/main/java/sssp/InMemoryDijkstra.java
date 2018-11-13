@@ -1,6 +1,7 @@
 package sssp;
 
 import util.AdjListEntryManager;
+import util.AdjListManager;
 import vo.Neighbor;
 import vo.TournamentNode;
 
@@ -17,7 +18,6 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 public class InMemoryDijkstra {
-    AdjListEntryManager adjListManager;
     PrintWriter pr;
     long start = System.currentTimeMillis();
     private static int NODE_SIZE = 2675656;
@@ -25,8 +25,7 @@ public class InMemoryDijkstra {
     public static int popCount = 0;
 
     public InMemoryDijkstra() throws Exception {
-        adjListManager = new AdjListEntryManager();
-        String path = "./../map-data/result/in-memory.txt";
+        String path = "./map-data/result/in-memory.txt";
         Path pathToFile = Paths.get(path);
         if(!Files.exists(pathToFile)) {
             Files.createDirectories(pathToFile.getParent());
@@ -71,7 +70,7 @@ public class InMemoryDijkstra {
             if(result.size() == dest && !isDest) {
                 break;
             }
-            List<Neighbor> neighbors = adjListManager.readAdjListEntry(curr);
+            List<Neighbor> neighbors = AdjListManager.readAdjListEntry(curr);
 
             for (Neighbor neighbor : neighbors) {
                 int node = neighbor.getId();
@@ -90,9 +89,9 @@ public class InMemoryDijkstra {
         pr.println("Priority Queue Pop: " + popCount + " Priority Queue Update: " + updateCount);
         pr.println("Total time Pass: " + (System.currentTimeMillis() - start));
 
-//        for(TournamentNode node: result) {
-//            pr.println(node.getNodeId() + ", " + node.getDist());
-//        }
+        for(TournamentNode node: result) {
+            pr.println(node.getNodeId() + ", " + node.getDist());
+        }
 
         pr.close();
     }
