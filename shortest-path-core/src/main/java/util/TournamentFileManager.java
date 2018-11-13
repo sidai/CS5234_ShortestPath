@@ -411,17 +411,24 @@ public class TournamentFileManager {
 
     private static Pair<TournamentTreeEdgeUtil, Boolean> getChildTreeEdge(int start, int end) throws Exception{
         File file = new File(EDGE_DIRECTORY + String.format(RANGE_PATTERN, start, end));
-        boolean exist;
+        boolean isLeaf;
+
+        int middle = (start + end)/2;
+        File leftChild = new File(EDGE_DIRECTORY + String.format(RANGE_PATTERN, start, middle));
+        File rightChild = new File(EDGE_DIRECTORY + String.format(RANGE_PATTERN, middle, end));
 
         TournamentTreeEdgeUtil edge = new TournamentTreeEdgeUtil(file);
         if (file.exists()) {
             edge.readFromFile();
             IOEdgeReadCount++;
-            exist = true;
-        } else {
-            exist = false;
+            isLeaf = true;
+        } else if(!leftChild.exists() && !rightChild.exists()){
+            isLeaf = true;
+            isLeaf = false;
         }
 
-        return new Pair<>(edge, exist);
+        return new Pair<>(edge, isLeaf);
+
+
     }
 }
