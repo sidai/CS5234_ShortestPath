@@ -8,7 +8,7 @@ public class DijkstraTest {
         DijkstraTest test = new DijkstraTest();
         String edgeCSV = "./map-data/sorted-graph/edge.csv";
         AdjListManager.loadFromFile(edgeCSV);
-        test.testDijkstra();
+//        test.testDijkstra();
 //        test.testInMemoryDijkstra();
         test.testNormalDijkstra();
     }
@@ -16,19 +16,19 @@ public class DijkstraTest {
     public void testDijkstra() throws Exception {
         String path = "./map-data/result/cache-eff.txt";
         CacheEfficientDijkstra process = new CacheEfficientDijkstra(path);
-        process.dijkstra(2, 100000);
+        process.dijkstra(2, 200);
     }
 
     public void testNormalDijkstra() throws Exception {
         String path = "./map-data/result/normal.txt";
         NormalDijkstra process = new NormalDijkstra(path);
-        process.dijkstra(2, 100000);
+        process.dijkstra(2, 200);
     }
 
     public void testInMemoryDijkstra() throws Exception {
         String path = "./map-data/result/in-memory.txt";
         InMemoryDijkstra process = new InMemoryDijkstra(path);
-        process.dijkstra(2, 100000);
+        process.dijkstra(2, 200);
     }
 }
 

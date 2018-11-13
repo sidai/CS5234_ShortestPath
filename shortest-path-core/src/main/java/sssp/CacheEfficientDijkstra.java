@@ -36,8 +36,7 @@ public class CacheEfficientDijkstra {
 
         TournamentFileManager.updateDistance(src, src, currentDistance);
 
-        List<Pair> result = new ArrayList<>();
-        int resultCount = 0;
+        List<Pair<Integer, Double>> result = new ArrayList<>();
         while (true) {
             TournamentNode nextNode = TournamentFileManager.extractMinNode();
             if (nextNode == null) {
@@ -55,20 +54,19 @@ public class CacheEfficientDijkstra {
             for (Neighbor neighbor : neighbors) {
                 TournamentFileManager.updateDistance(src, neighbor.getId(), currentDistance + neighbor.getDistance());
             }
-            resultCount++;
         }
-        printNode();
+//        printNode();
         pr.println("-----------------------------------------------------------------------------------------");
-        pr.println("Result count: " + resultCount);
+        pr.println("Result count: " + result.size());
         pr.println("Node Operation: " + TournamentFileManager.nodePopCount + " " + TournamentFileManager.nodeUpdateCount + " " + TournamentFileManager.nodeDeleteCount);
         pr.println("Edge Operation: " + TournamentFileManager.edgePopCount + " " + TournamentFileManager.edgeUpdateCount + " " + TournamentFileManager.edgeDeleteCount);
-        pr.println("Priority Queue Read:"+TournamentFileManager.IOEdgeReadCount+" Priority Queue Write:"+TournamentFileManager.IOEdgeWriteCount);
-        pr.println("Priority Queue Read:"+TournamentFileManager.IONodeReadCount+" Priority Queue Write:"+TournamentFileManager.IONodeWriteCount);
+        pr.println("Priority Queue Read: "+TournamentFileManager.IOEdgeReadCount+" Priority Queue Write: "+TournamentFileManager.IOEdgeWriteCount);
+        pr.println("Priority Queue Read: "+TournamentFileManager.IONodeReadCount+" Priority Queue Write: "+TournamentFileManager.IONodeWriteCount);
         pr.println("Total time Pass: " + (System.currentTimeMillis() - start));
 
-        for(Pair pair: result) {
-            pr.println(pair.getKey() + ", " + pair.getValue());
-        }
+//        for(Pair pair: result) {
+//            pr.println(pair.getKey() + ", " + pair.getValue());
+//        }
 
         pr.close();
     }

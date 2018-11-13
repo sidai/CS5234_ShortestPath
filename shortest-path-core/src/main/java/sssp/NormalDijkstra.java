@@ -6,11 +6,13 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 import util.AdjListManager;
 import util.ExternalResult;
 import util.ExternalPriorityQueue;
+import util.Pair;
 import vo.Neighbor;
 import vo.PQNode;
 
@@ -39,8 +41,7 @@ public class NormalDijkstra {
         double currentDistance = 0;
 
         pq.insert(new PQNode(src,0));
-
-
+        List<Pair<Integer, Double>> resultNode = new ArrayList<>();
         while(!pq.isEmpty()) {
 
             PQNode nextNode = pq.pop();
@@ -53,6 +54,7 @@ public class NormalDijkstra {
             currentDistance = nextNode.getDist();
             pr.println(src + ", " + currentDistance);
             result.insertResult(src, currentDistance);
+            resultNode.add(new Pair(src, currentDistance));
             if(result.resultCount == count) {
                 break;
             }
@@ -79,17 +81,6 @@ public class NormalDijkstra {
                     }
                 }
             }
-            if(result.resultCount%1000==0){
-//                pr.println(result.resultCount+"______________");
-//                pr.println("Priority Queue Read:"+pq.IOReadCount+" Priority Queue Write:"+pq.IOWriteCount);
-//                pr.println("Result Read:"+result.IOReadCount+" Result Write:"+result.IOWriteCount);
-//                pr.println(pq.popTime+" "+pq.insertTime +" "+pq.updateTime+" "+pq.retrieveTime);
-//                pr.println(result.insertTime+" "+result.retrieveTime);
-                System.out.println("Time Pass: " + (System.currentTimeMillis() - start));
-                if(result.resultCount == 4400) {
-                    break;
-                }
-            }
         }
         pr.println("-----------------------------------------------------------------------------------------");
         pr.println("Result count: " + result.resultCount);
@@ -97,5 +88,11 @@ public class NormalDijkstra {
         pr.println("Priority Queue Read:"+pq.IOReadCount+" Priority Queue Write:"+pq.IOWriteCount);
         pr.println("Result Read:"+result.IOReadCount+" Result Write:"+result.IOWriteCount);
         pr.println("Total time Pass: " + (System.currentTimeMillis() - start));
+
+//        for(Pair pair: result) {
+//            pr.println(pair.getKey() + ", " + pair.getValue());
+//        }
+        pr.close();
+
     }
 }
