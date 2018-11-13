@@ -1,13 +1,11 @@
 package sssp;
 
-import javafx.util.Pair;
 import util.AdjListEntryManager;
 import vo.Neighbor;
 import vo.TournamentNode;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -63,7 +61,6 @@ public class InMemoryDijkstra {
 
             double dist = nodeWithWeight.getDist();
             if (curr == dest) {
-                System.out.println("reach " + curr);
                 break;
             }
 
@@ -71,7 +68,7 @@ public class InMemoryDijkstra {
             added[curr] = true;
             result.add(nodeWithWeight);
 
-            if(result.size() == 4000) {
+            if(result.size() == 4400) {
                 break;
             }
             List<Neighbor> neighbors = adjListManager.readAdjListEntry(curr);

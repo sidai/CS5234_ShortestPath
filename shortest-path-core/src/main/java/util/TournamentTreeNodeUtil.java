@@ -4,6 +4,7 @@ import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 import com.univocity.parsers.csv.CsvWriter;
 import com.univocity.parsers.csv.CsvWriterSettings;
+import sun.jvm.hotspot.utilities.Assert;
 import vo.OperationNode;
 import vo.TournamentNode;
 import vo.OperationNode.OpType;
@@ -111,6 +112,9 @@ public class TournamentTreeNodeUtil {
         return minElements;
     }
 
+    public PriorityQueue<TournamentNode> getMaxElements() {
+        return maxElements;
+    }
 
     public Map<Integer, OperationNode> getBuffer() {
         return buffer;
@@ -133,40 +137,62 @@ public class TournamentTreeNodeUtil {
 
     public void updateDistance(int id, double dist) throws Exception{
         // elements contains the node, replace if dist decreases
+        // in this case there is never a operation of this node in the buffer
         if (elementsRef.containsKey(id)) {
             TournamentNode duplicate = elementsRef.get(id);
             if(duplicate.getDist() > dist) {
                 duplicate.setDist(dist);
             }
+            // in other case discards the operation since it is larger
         }
 
         //elements doesn't contain the node, check if need to insert into elements.
         else {
-            if (minAmongChild >= dist) {
-                addElement(id, dist);
-                if (minElements.size() > ConfigManager.getMemorySize()) {
-                    TournamentNode toBuffer = maxElements.peek();
-                    removeElement(toBuffer.getNodeId());
-                    bufferUpdateOp(toBuffer.getNodeId(), toBuffer.getDist());
+            if (buffer.containsKey(id)) {
+                OperationNode node = buffer.get(id);
+                //ignore since it has been removed.
+                if (OpType.DELETE.equals(node.getOperation())) {
+                    return;
+                } else {
+                    //need to update value
+                    if(node.getValue() > dist) {
+                        //directly insert and discard the old update
+                        if (dist < minAmongChild) {
+                            buffer.remove(id);
+                            addElement(id, dist);
+                            if (minElements.size() > ConfigManager.getMemorySize()) {
+                                TournamentNode toBuffer = maxElements.peek();
+                                removeElement(toBuffer.getNodeId());
+                                bufferUpdateOp(toBuffer.getNodeId(), toBuffer.getDist());
+                            }
+                        } else {
+                            node.setValue(dist);
+                        }
+                    }
+                    // in other case discards the operation since it is larger
                 }
             } else {
-                bufferUpdateOp(id, dist);
+                if (minAmongChild >= dist) {
+                    addElement(id, dist);
+                    if (minElements.size() > ConfigManager.getMemorySize()) {
+                        TournamentNode toBuffer = maxElements.peek();
+                        removeElement(toBuffer.getNodeId());
+                        bufferUpdateOp(toBuffer.getNodeId(), toBuffer.getDist());
+                    }
+                } else {
+                    bufferUpdateOp(id, dist);
+                }
             }
         }
     }
 
     private void bufferUpdateOp(int id, double dist) throws Exception{
         if (buffer.containsKey(id)) {
-            OperationNode op = buffer.get(id);
-            // ignore when exists DELETE (only extractMin can delete) or UPDATE with smaller value
-            if (op.getOperation().equals(OpType.UPDATE) && op.getValue() > dist) {
-                op.setValue(dist);
-            }
-        } else {
-            buffer.put(id, new OperationNode(OpType.UPDATE, id, dist));
-            if (buffer.size() == ConfigManager.getMemorySize()) {
-                TournamentFileManager.empty(this);
-            }
+            throw new RuntimeException("Must ensure there is no operation associate for the node before insert a new update operation");
+        }
+        buffer.put(id, new OperationNode(OpType.UPDATE, id, dist));
+        if (buffer.size() == ConfigManager.getMemorySize()) {
+            TournamentFileManager.fillup(this);
         }
     }
 
@@ -183,7 +209,7 @@ public class TournamentTreeNodeUtil {
         // replace with DELETE operation
         buffer.put(id, new OperationNode(OpType.DELETE, id));
         if (buffer.size() == ConfigManager.getMemorySize()) {
-            TournamentFileManager.empty(this);
+            TournamentFileManager.fillup(this);
         }
     }
 
@@ -211,7 +237,6 @@ public class TournamentTreeNodeUtil {
             parser.beginParsing(reader);
             String[] count = parser.parseNext();
 
-            System.out.println(file.getName());
             minAmongChild = Double.parseDouble(count[2]);
 
             String[] nodeString;

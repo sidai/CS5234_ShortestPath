@@ -53,21 +53,20 @@ public class CacheEfficientDijkstra {
             if (src == dest) {
                 break;
             }
-
             List<Neighbor> neighbors = adjListManager.readAdjListEntry(src);
 
             for (Neighbor neighbor : neighbors) {
                 TournamentFileManager.updateDistance(src, neighbor.getId(), currentDistance + neighbor.getDistance());
             }
             resultCount++;
-//            if(result.size() % 1000 == 0) {
-//                System.out.println("Count: " + resultCount + ", Time Pass: " + (System.currentTimeMillis() - start));
-            if(result.size() == 4000) {
-                break;
+            if(result.size() % 200 == 0) {
+                System.out.println("Count: " + resultCount + ", Time Pass: " + (System.currentTimeMillis() - start));
+                if (result.size() == 4400) {
+                    break;
+                }
             }
-//            }
         }
-//        printNode();
+        printNode();
         pr.println("-----------------------------------------------------------------------------------------");
         pr.println("Result count: " + resultCount);
         pr.println("Node Operation: " + TournamentFileManager.nodePopCount + " " + TournamentFileManager.nodeUpdateCount + " " + TournamentFileManager.nodeDeleteCount);
@@ -86,43 +85,54 @@ public class CacheEfficientDijkstra {
     public void printNode() {
         List<TournamentNode> nodes = new ArrayList<>(TournamentFileManager.nodeRoot.getElements());
         List<TournamentNode> nodesRef = new ArrayList<>(TournamentFileManager.nodeRoot.getElementsRef().values());
-        pr.println("---------------------------------Elements: " + TournamentFileManager.nodeRoot.getElements().size() + "----------------------------------------------");
-        nodes.removeAll(nodesRef);
-        Collections.sort(nodes);
-        for(TournamentNode node: nodes) {
-            pr.println(node.toString());
-        }
+        pr.println("---------------------------------Node Elements: " + TournamentFileManager.nodeRoot.getElements().size() + "----------------------------------------------");
+//        nodes.removeAll(nodesRef);
+//        Collections.sort(nodes);
+//        for(TournamentNode node: nodes) {
+//            pr.println(node.toString());
+//        }
 
-        nodes = new ArrayList<>(TournamentFileManager.nodeRoot.getElements());
-        pr.println("--------------------------------Elements Reference:  " + TournamentFileManager.nodeRoot.getElementsRef().size() + "-----------------------------------------");
-        nodesRef.removeAll(nodes);
-        Collections.sort(nodesRef);
-        for(TournamentNode node: nodesRef) {
-            pr.println(node.toString());
-        }
+        List<TournamentNode> maxNode = new ArrayList<>(TournamentFileManager.nodeRoot.getMaxElements());
+        pr.println("---------------------------------Node Max Elements: " + TournamentFileManager.nodeRoot.getMaxElements().size() + "----------------------------------------------");
+//        maxNode.removeAll(nodesRef);
+//        Collections.sort(maxNode);
+//        for(TournamentNode node: maxNode) {
+//            pr.println(node.toString());
+//        }
+
+//        nodes = new ArrayList<>(TournamentFileManager.nodeRoot.getElements());
+        pr.println("--------------------------------Node Elements Reference:  " + TournamentFileManager.nodeRoot.getElementsRef().size() + "-----------------------------------------");
+//        nodesRef.removeAll(nodes);
+//        Collections.sort(nodesRef);
+//        for(TournamentNode node: nodesRef) {
+//            pr.println(node.toString());
+//        }
 
 
-        pr.println("--------------------------------Elements Buffer:  " + TournamentFileManager.nodeRoot.getBuffer().size() + "-----------------------------------------");
+        pr.println("--------------------------------Node Elements Buffer:  " + TournamentFileManager.nodeRoot.getBuffer().size() + "-----------------------------------------");
 //        List<OperationNode> opNodes = new ArrayList<>(TournamentFileManager.nodeRoot.getBuffer().values());
 //        for(OperationNode op: opNodes) {
 //            pr.println(op.toString());
 //        }
 
-        pr.println("---------------------------------Elements: " + TournamentFileManager.edgeRoot.getElements().size() + "----------------------------------------------");
+        pr.println("---------------------------------Edge Elements: " + TournamentFileManager.edgeRoot.getElements().size() + "----------------------------------------------");
 //        List<TournamentEdge> edges = new ArrayList<>(TournamentFileManager.edgeRoot.getElements());
 //        Collections.sort(edges);
 //        for(TournamentEdge edge: edges) {
 //            pr.println(edge.toString());
 //        }
 
-        pr.println("--------------------------------Elements Reference:  " + TournamentFileManager.edgeRoot.getElementsRef().size() + "-----------------------------------------");
+        pr.println("---------------------------------Edge Max Elements: " + TournamentFileManager.edgeRoot.getMaxElements().size() + "----------------------------------------------");
+
+
+        pr.println("--------------------------------Edge Elements Reference:  " + TournamentFileManager.edgeRoot.getElementsRef().size() + "-----------------------------------------");
 //        edges = new ArrayList<>(TournamentFileManager.edgeRoot.getElementsRef().values());
 //        Collections.sort(edges);
 //        for(TournamentEdge edge: edges) {
 //            pr.println(edge.toString());
 //        }
 
-        pr.println("--------------------------------Elements Buffer:  " + TournamentFileManager.edgeRoot.getBuffer().size() + "-----------------------------------------");
+        pr.println("--------------------------------Edge Elements Buffer:  " + TournamentFileManager.edgeRoot.getBuffer().size() + "-----------------------------------------");
 //        List<OperationEdge> edgeOps = new ArrayList<>(TournamentFileManager.edgeRoot.getBuffer().values());
 //        for(OperationEdge op: edgeOps) {
 //            pr.println(op.toString());

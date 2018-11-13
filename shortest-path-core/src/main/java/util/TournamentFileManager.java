@@ -97,7 +97,6 @@ public class TournamentFileManager {
     }
 
     public static void empty(TournamentTreeNodeUtil tNode) throws Exception {
-        System.out.println("Empty node");
         String[] range = tNode.getFile().getName().split("\\.")[0].split("-");
         int start = Integer.parseInt(range[0]);
         int end = Integer.parseInt(range[1]);
@@ -167,7 +166,6 @@ public class TournamentFileManager {
     }
 
     public static void empty(TournamentTreeEdgeUtil tEdge) throws Exception {
-        System.out.println("Empty edge");
         String[] range = tEdge.getFile().getName().split("\\.")[0].split("-");
         int start = Integer.parseInt(range[0]);
         int end = Integer.parseInt(range[1]);
@@ -237,7 +235,6 @@ public class TournamentFileManager {
     }
 
     public static void fillup(TournamentTreeEdgeUtil tEdge) throws Exception{
-        System.out.println("fill-up edge");
         String[] range = tEdge.getFile().getName().split("\\.")[0].split("-");
         int start = Integer.parseInt(range[0]);
         int end = Integer.parseInt(range[1]);
@@ -325,7 +322,6 @@ public class TournamentFileManager {
     }
 
     public static void fillup(TournamentTreeNodeUtil tNode) throws Exception{
-        System.out.println("fill-up node");
         String[] range = tNode.getFile().getName().split("\\.")[0].split("-");
         int start = Integer.parseInt(range[0]);
         int end = Integer.parseInt(range[1]);
@@ -405,11 +401,11 @@ public class TournamentFileManager {
         tNode.resetMinAmongChild();
         if (leftChild.getFile().exists()) {
             leftChild.storeToFile();
-            IOEdgeWriteCount += 1;
+            IONodeWriteCount += 1;
         }
         if (rightChild.getFile().exists()) {
             rightChild.storeToFile();
-            IOEdgeWriteCount += 1;
+            IONodeWriteCount += 1;
         }
     }
 

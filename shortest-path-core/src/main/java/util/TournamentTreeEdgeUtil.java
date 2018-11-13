@@ -92,6 +92,10 @@ public class TournamentTreeEdgeUtil {
         return minElements;
     }
 
+    public PriorityQueue<TournamentEdge> getMaxElements() {
+        return maxElements;
+    }
+
     public Map<Pair<Integer, Integer>, OperationEdge> getBuffer() {
         return buffer;
     }
@@ -143,25 +147,52 @@ public class TournamentTreeEdgeUtil {
 
     public void updateDistance(int fromNode, int toNode, double dist) throws Exception{
         // elements contains the node, replace if dist decreases
+        // in this case there is never a operation of this node in the buffer
         Pair<Integer, Integer> key = new Pair<>(fromNode, toNode);
         if (elementsRef.containsKey(key)) {
             TournamentEdge duplicate = elementsRef.get(key);
             if(duplicate.getDist() > dist) {
                 duplicate.setDist(dist);
             }
+            // in other case discards the operation since it is larger
         }
 
         //elements doesn't contain the node, check if need to insert into elements.
         else {
-            if (minAmongChild >= dist) {
-                addElement(fromNode, toNode, dist);
-                if (maxElements.size() > ConfigManager.getMemorySize()) {
-                    TournamentEdge toBuffer = maxElements.peek();
-                    removeElement(new Pair<>(toBuffer.getFromNode(), toBuffer.getToNode()));
-                    bufferUpdateOp(toBuffer.getFromNode(), toBuffer.getToNode(), toBuffer.getDist());
+            if (buffer.containsKey(key)) {
+                OperationEdge node = buffer.get(key);
+                //ignore since it has been removed.
+                if (OpType.DELETE.equals(node.getOperation())) {
+                    return;
+                } else {
+                    //need to update value
+                    if(node.getValue() > dist) {
+                        //directly insert and discard the old update
+                        if (dist < minAmongChild) {
+                            buffer.remove(key);
+                            addElement(fromNode, toNode, dist);
+                            if (minElements.size() > ConfigManager.getMemorySize()) {
+                                TournamentEdge toBuffer = maxElements.peek();
+                                removeElement(key);
+                                bufferUpdateOp(toBuffer.getFromNode(), toBuffer.getToNode(), toBuffer.getDist());
+                            }
+                        } else {
+                            node.setValue(dist);
+                        }
+                    }
+                    // in other case discards the operation since it is larger
                 }
             } else {
-                bufferUpdateOp(fromNode, toNode, dist);
+                if (minAmongChild >= dist) {
+                    addElement(fromNode, toNode, dist);
+                    if (minElements.size() > ConfigManager.getMemorySize()) {
+                        TournamentEdge toBuffer = maxElements.peek();
+                        removeElement(key);
+                        bufferUpdateOp(toBuffer.getFromNode(), toBuffer.getToNode(), toBuffer.getDist());
+                    }
+                } else {
+                    bufferUpdateOp(fromNode, toNode, dist);
+                }
             }
         }
     }
@@ -169,16 +200,11 @@ public class TournamentTreeEdgeUtil {
     private void bufferUpdateOp(int fromNode, int toNode, double dist) throws Exception{
         Pair<Integer, Integer> key = new Pair<>(fromNode, toNode);
         if (buffer.containsKey(key)) {
-            OperationEdge op = buffer.get(key);
-            // ignore when exists DELETE (only extractMin can delete) or UPDATE with smaller value
-            if (op.getOperation().equals(OpType.UPDATE) && op.getValue() > dist) {
-                op.setValue(dist);
-            }
-        } else {
-            buffer.put(key, new OperationEdge(OpType.UPDATE, fromNode, toNode, dist));
-            if (buffer.size() == ConfigManager.getMemorySize()) {
-                TournamentFileManager.fillup(this);
-            }
+            throw new RuntimeException("Must ensure there is no operation associate for the edge before insert a new update operation");
+        }
+        buffer.put(key, new OperationEdge(OpType.UPDATE, fromNode, toNode, dist));
+        if (buffer.size() == ConfigManager.getMemorySize()) {
+            TournamentFileManager.fillup(this);
         }
     }
 
@@ -222,7 +248,6 @@ public class TournamentTreeEdgeUtil {
             parser.beginParsing(reader);
             String[] count = parser.parseNext();
 
-            System.out.println(file.getName());
             minAmongChild = Double.parseDouble(count[2]);
 
             String[] nodeString;
