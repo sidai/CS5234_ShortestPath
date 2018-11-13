@@ -18,9 +18,9 @@ import java.util.*;
 
 public class ExternalResult {
 
-    private static int ENTRY_BLOCK_SIZE = 13867;
+    private static int ENTRY_BLOCK_SIZE = ConfigManager.getMemorySize();
 
-    private static String DIRECTORY = "./map-data/external-result/";
+
     private static String NAME_PATTERN = "EXTERNAL_RESULT_[%d-%d).csv";
 
 //    private static int ENTRY_BLOCK_SIZE = 10;
@@ -33,7 +33,10 @@ public class ExternalResult {
     public long insertTime = 0;
     public long retrieveTime = 0;
 
-    public ExternalResult() throws Exception {
+    private String DIRECTORY;
+
+    public ExternalResult(String directory) throws Exception {
+        DIRECTORY = directory;
         Path pathToDirectory = Paths.get(DIRECTORY);
         if (!Files.exists(pathToDirectory)) {
             Files.createDirectories(pathToDirectory);

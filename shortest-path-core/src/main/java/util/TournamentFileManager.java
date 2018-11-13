@@ -249,18 +249,19 @@ public class TournamentFileManager {
 
         List<OperationEdge> leftOps = ops.getKey();
         if (!leftOps.isEmpty()) {
-            if (!leftPair.getValue()) {
+            process(leftChild, leftOps, leftCommit);
+            // there is new element, init the file if it does not exist.
+            if (!leftPair.getValue() && !leftChild.isEmpty()) {
                 leftChild.init();
             }
-            process(leftChild, leftOps, leftCommit);
         }
 
         List<OperationEdge> rightOps = ops.getValue();
         if (!rightOps.isEmpty()) {
-            if (!rightPair.getValue()) {
+            process(rightChild, rightOps, rightCommit);
+            if (!rightPair.getValue() && !rightChild.isEmpty()) {
                 rightChild.init();
             }
-            process(rightChild, rightOps, rightCommit);
         }
 
         boolean isNotFull = true;
@@ -336,18 +337,18 @@ public class TournamentFileManager {
 
         List<OperationNode> leftOps = ops.getKey();
         if (!leftOps.isEmpty()) {
-            if (!leftPair.getValue()) {
+            process(leftChild, leftOps, leftCommit);
+            if (!leftPair.getValue() && !leftChild.isEmpty()) {
                 leftChild.init();
             }
-            process(leftChild, leftOps, leftCommit);
         }
 
         List<OperationNode> rightOps = ops.getValue();
         if (!rightOps.isEmpty()) {
-            if (!rightPair.getValue()) {
+            process(rightChild, rightOps, rightCommit);
+            if (!rightPair.getValue() && !rightChild.isEmpty()) {
                 rightChild.init();
             }
-            process(rightChild, rightOps, rightCommit);
         }
 
         boolean isNotFull = true;

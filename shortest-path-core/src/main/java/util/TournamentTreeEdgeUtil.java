@@ -70,6 +70,10 @@ public class TournamentTreeEdgeUtil {
         return minElements.size()>=ConfigManager.getMemorySize();
     }
 
+    public boolean isEmpty(){
+        return minElements.size() == 0;
+    }
+
     public void removeElement(Pair<Integer, Integer> key) {
         TournamentEdge edge = elementsRef.remove(key);
         minElements.remove(edge);

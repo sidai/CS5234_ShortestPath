@@ -104,6 +104,10 @@ public class TournamentTreeNodeUtil {
         return minElements.size()>=ConfigManager.getMemorySize();
     }
 
+    public boolean isEmpty(){
+        return minElements.size()==0;
+    }
+
     public boolean addElement(TournamentNode element) {
         addElement(element.getNodeId(), element.getDist());
         return isFull();

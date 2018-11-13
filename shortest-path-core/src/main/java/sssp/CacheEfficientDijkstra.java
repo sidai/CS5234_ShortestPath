@@ -19,7 +19,7 @@ public class CacheEfficientDijkstra {
 
     public CacheEfficientDijkstra() throws Exception {
         TournamentFileManager.initialize();
-        String path = "./map-data/result/cache-eff.txt";
+        String path = "./map-data/result/cache-eff-v2.txt";
         Path pathToFile = Paths.get(path);
         if(!Files.exists(pathToFile)) {
             Files.createDirectories(pathToFile.getParent());

@@ -10,8 +10,10 @@ public class DijkstraTest {
         DijkstraTest test = new DijkstraTest();
         String edgeCSV = "./map-data/sorted-graph/edge.csv";
         AdjListManager.loadFromFile(edgeCSV);
-//        test.testInMemoryDijkstra();
         test.testDijkstra();
+//        test.testInMemoryDijkstra();
+
+//        test.testNormalDijkstraCache();
 //        test.testNormalDijkstra();
     }
 
@@ -41,7 +43,21 @@ public class DijkstraTest {
         reportPoitns.add(6000);
         reportPoitns.add(8000);
         NormalDijkstra process = new NormalDijkstra();
-        process.dijkstra(1, 10000, false, reportPoitns);
+        process.dijkstra(false,1, 10000, false, reportPoitns);
+    }
+
+    public void testNormalDijkstraCache() throws Exception {
+        List<Integer> reportPoitns = new ArrayList<>();
+        reportPoitns.add(100);
+        reportPoitns.add(200);
+        reportPoitns.add(500);
+        reportPoitns.add(1000);
+        reportPoitns.add(2000);
+        reportPoitns.add(4000);
+        reportPoitns.add(6000);
+        reportPoitns.add(8000);
+        NormalDijkstra process = new NormalDijkstra();
+        process.dijkstra(true,1, 10000, false, reportPoitns);
     }
 
     public void testInMemoryDijkstra() throws Exception {
