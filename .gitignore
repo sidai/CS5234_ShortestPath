@@ -1,7 +1,5 @@
 target/
-map-data/adjacency-list/
-map-data/priority-queue/
-map-data/external-result/
+map-data/
 *.pdf
 shortest-path-core/map-data/
 *pbf

@@ -17,32 +17,45 @@ public class DijkstraTest {
 
     public void testDijkstra() throws Exception {
         List<Integer> reportPoitns = new ArrayList<>();
+        reportPoitns.add(100);
+        reportPoitns.add(200);
+        reportPoitns.add(500);
         reportPoitns.add(1000);
-        reportPoitns.add(5000);
-        reportPoitns.add(10000);
-        reportPoitns.add(20000);
+        reportPoitns.add(2000);
+        reportPoitns.add(4000);
+        reportPoitns.add(6000);
+        reportPoitns.add(8000);
         CacheEfficientDijkstra process = new CacheEfficientDijkstra();
-        process.dijkstra(2, 100, false, reportPoitns);
+        process.dijkstra(2, 10000, false, reportPoitns);
     }
 
 
     public void testNormalDijkstra() throws Exception {
         List<Integer> reportPoitns = new ArrayList<>();
+        reportPoitns.add(100);
+        reportPoitns.add(200);
+        reportPoitns.add(500);
         reportPoitns.add(1000);
-        reportPoitns.add(5000);
-        reportPoitns.add(10000);
+        reportPoitns.add(2000);
+        reportPoitns.add(4000);
+        reportPoitns.add(6000);
+        reportPoitns.add(8000);
         NormalDijkstra process = new NormalDijkstra();
-        process.dijkstra(2, 100, false, reportPoitns);
+        process.dijkstra(2, 10000, false, reportPoitns);
     }
 
     public void testInMemoryDijkstra() throws Exception {
         List<Integer> reportPoitns = new ArrayList<>();
+        reportPoitns.add(100);
+        reportPoitns.add(200);
+        reportPoitns.add(500);
         reportPoitns.add(1000);
-        reportPoitns.add(5000);
-        reportPoitns.add(10000);
-        reportPoitns.add(20000);
+        reportPoitns.add(2000);
+        reportPoitns.add(4000);
+        reportPoitns.add(6000);
+        reportPoitns.add(8000);
         InMemoryDijkstra process = new InMemoryDijkstra();
-        process.dijkstra(2, 100, false, reportPoitns);
+        process.dijkstra(2, 10000, false, reportPoitns);
     }
 }
 
