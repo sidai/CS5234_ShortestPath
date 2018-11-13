@@ -78,6 +78,7 @@ public class TournamentFileManager {
 
     public static TournamentNode extractMinNode() throws Exception{
         TournamentNode minNode = nodeRoot.findMin();
+        System.out.println(minNode.getDist());
         nodePopCount++;
         TournamentEdge minEdge = edgeRoot.findMin();
         edgePopCount++;
@@ -279,15 +280,15 @@ public class TournamentFileManager {
             rightElements = new ArrayList<>(rightChild.getElements());
         }
 
-        Collections.sort(leftElements);
-        Collections.sort(rightElements);
+        leftElements.sort(Comparator.comparingDouble(TournamentEdge::getDist));
+        rightElements.sort(Comparator.comparingDouble(TournamentEdge::getDist));
 
         while (isNotFull){
             if(leftPointer < leftElements.size() && rightPointer < rightElements.size()) {
                 TournamentEdge left = leftElements.get(leftPointer);
                 TournamentEdge right = rightElements.get(rightPointer);
                 TournamentEdge next = null;
-                if (left.compareTo(right) < 0) {
+                if (left.getDist() <= right.getDist()) {
                     next = left;
                     leftPointer++;
                 } else {
@@ -367,15 +368,15 @@ public class TournamentFileManager {
             rightElements = new ArrayList<>(rightChild.getElements());
         }
 
-        Collections.sort(leftElements);
-        Collections.sort(rightElements);
+        leftElements.sort(Comparator.comparingDouble(TournamentNode::getDist));
+        rightElements.sort(Comparator.comparingDouble(TournamentNode::getDist));
 
         while (isNotFull){
             if(leftPointer < leftElements.size() && rightPointer < rightElements.size()) {
                 TournamentNode left = leftElements.get(leftPointer);
                 TournamentNode right = rightElements.get(rightPointer);
                 TournamentNode next = null;
-                if (left.compareTo(right) < 0) {
+                if (left.getDist() <= right.getDist()) {
                     next = left;
                     leftPointer++;
                 } else {

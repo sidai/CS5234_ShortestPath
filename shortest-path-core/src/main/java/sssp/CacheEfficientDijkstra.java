@@ -21,7 +21,7 @@ public class CacheEfficientDijkstra {
 
     public CacheEfficientDijkstra() throws Exception {
         TournamentFileManager.initialize();
-        String path = "./map-data/result/cache-eff.txt";
+        String path = "./map-data/result/cache-eff1.txt";
         Path pathToFile = Paths.get(path);
         if(!Files.exists(pathToFile)) {
             Files.createDirectories(pathToFile.getParent());
@@ -36,7 +36,7 @@ public class CacheEfficientDijkstra {
 
         TournamentFileManager.updateDistance(src, src, currentDistance);
 
-        List<Pair> result = new ArrayList<>();
+        List<TournamentNode> result = new ArrayList<>();
         while (true) {
             TournamentNode nextNode = TournamentFileManager.extractMinNode();
             if (nextNode == null) {
@@ -45,13 +45,18 @@ public class CacheEfficientDijkstra {
 
             src = nextNode.getNodeId();
             currentDistance = nextNode.getDist();
-            result.add(new Pair(src, currentDistance));
+            result.add(new TournamentNode(src, currentDistance));
             if (src == dest && isDest) {
                 break;
             }
             List<Neighbor> neighbors = AdjListManager.readAdjListEntry(src);
-
+            if(nextNode.getNodeId() == 60485) {
+                pr.println("Not reachable");
+            }
             for (Neighbor neighbor : neighbors) {
+                if(neighbor.getId() == 60486) {
+                    pr.println("Not reachable");
+                }
                 TournamentFileManager.updateDistance(src, neighbor.getId(), currentDistance + neighbor.getDistance());
             }
             if(reportPoints.contains(result.size())) {
@@ -73,8 +78,8 @@ public class CacheEfficientDijkstra {
         pr.println("Priority Queue Read:"+TournamentFileManager.IONodeReadCount+" Priority Queue Write:"+TournamentFileManager.IONodeWriteCount);
         pr.println("Total time Pass: " + (System.currentTimeMillis() - start));
 
-        for(Pair pair: result) {
-            pr.println(pair.getKey() + ", " + pair.getValue());
+        for(TournamentNode node: result) {
+            pr.println(node.getNodeId() + ", " + node.getDist());
         }
 
         pr.close();
