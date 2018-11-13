@@ -2,6 +2,8 @@ target/
 map-data/adjacency-list/
 map-data/priority-queue/
 map-data/external-result/
+*.pdf
+shortest-path-core/map-data/
 *pbf
 .idea/
 *iml
@@ -10,3 +12,4 @@ map-data/external-result/
 .project
 *.pdf
 shortest-path-core/src/main/java/sssp/Preprocessing.java
+map-data/sorted-graph/edge.csv

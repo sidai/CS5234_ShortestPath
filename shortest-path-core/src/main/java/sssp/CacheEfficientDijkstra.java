@@ -32,7 +32,7 @@ public class CacheEfficientDijkstra {
         pr = new PrintWriter(new BufferedWriter(new FileWriter(path)));
     }
 
-    public void dijkstra(int src, int dest) throws Exception {
+    public void dijkstra(int src, int dest, boolean isDest, List<Integer> reportPoints) throws Exception {
         TournamentFileManager.clearAll();
         double currentDistance = 0.0;
 
@@ -49,7 +49,7 @@ public class CacheEfficientDijkstra {
             src = nextNode.getNodeId();
             currentDistance = nextNode.getDist();
             result.add(new Pair(src, currentDistance));
-            if (src == dest) {
+            if (src == dest && isDest) {
                 break;
             }
             List<Neighbor> neighbors = adjListManager.readAdjListEntry(src);
@@ -58,11 +58,16 @@ public class CacheEfficientDijkstra {
                 TournamentFileManager.updateDistance(src, neighbor.getId(), currentDistance + neighbor.getDistance());
             }
             resultCount++;
-            if(result.size() % 200 == 0) {
-                System.out.println("Count: " + resultCount + ", Time Pass: " + (System.currentTimeMillis() - start));
-                if (result.size() == 200) {
-                    break;
-                }
+            if(reportPoints.contains(resultCount)) {
+                System.out.println("report at "+resultCount+"----------------------------------------");
+                System.out.println("Time Pass: " + (System.currentTimeMillis() - start));
+                System.out.println("Edge Priority Queue Read:"+TournamentFileManager.IOEdgeReadCount+" Edge Priority Queue Write:"+TournamentFileManager.IOEdgeWriteCount);
+                System.out.println("Node Priority Queue Read:"+TournamentFileManager.IONodeReadCount+" Node Priority Queue Write:"+TournamentFileManager.IONodeWriteCount);
+
+
+            }
+            if (result.size() == dest && !isDest) {
+                break;
             }
         }
         printNode();

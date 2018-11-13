@@ -6,14 +6,15 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedList;
 import java.util.List;
 import util.ExternalResult;
 import util.AdjListEntryManager;
 import util.ExternalPriorityQueue;
 import vo.Neighbor;
 import vo.PQNode;
-
-
+import vo.TournamentNode;
+import util.Pair;
 
 
 public class NormalDijkstra {
@@ -36,8 +37,10 @@ public class NormalDijkstra {
         pr = new PrintWriter(new BufferedWriter(new FileWriter(path)));
     }
 
-    public void dijkstra(int src, int dest) throws Exception
+    public void dijkstra(int src, int dest, boolean isDest, List<Integer> reportPoints) throws Exception
     {
+
+        List<Pair<Integer, Double>> resultInMemory = new LinkedList<>();
         result.clearAll();
         pq.clearAll();
 
@@ -57,8 +60,9 @@ public class NormalDijkstra {
 
             src = nextNode.getNodeId();
             currentDistance = nextNode.getDist();
-            pr.println(src + ", " + currentDistance);
-            if(src == dest) {
+            //pr.println(src + ", " + currentDistance);
+            resultInMemory.add(new Pair(src, currentDistance));
+            if(src == dest && isDest) {
                 break;
             }
             result.insertResult(src, currentDistance);
@@ -85,16 +89,20 @@ public class NormalDijkstra {
                     }
                 }
             }
-            if(result.resultCount%1000==0){
+            if(reportPoints.contains(result.resultCount)){
 //                pr.println(result.resultCount+"______________");
 //                pr.println("Priority Queue Read:"+pq.IOReadCount+" Priority Queue Write:"+pq.IOWriteCount);
 //                pr.println("Result Read:"+result.IOReadCount+" Result Write:"+result.IOWriteCount);
 //                pr.println(pq.popTime+" "+pq.insertTime +" "+pq.updateTime+" "+pq.retrieveTime);
 //                pr.println(result.insertTime+" "+result.retrieveTime);
+                System.out.println("report at "+result.resultCount+"----------------------------------------");
                 System.out.println("Time Pass: " + (System.currentTimeMillis() - start));
-                if(result.resultCount == 4400) {
-                    break;
-                }
+                System.out.println("Priority Queue Read:"+pq.IOReadCount+" Priority Queue Write:"+pq.IOWriteCount);
+                System.out.println("Result Read:"+result.IOReadCount+" Result Write:"+result.IOWriteCount);
+
+            }
+            if(result.resultCount == dest && !isDest) {
+                break;
             }
         }
         pr.println("-----------------------------------------------------------------------------------------");
@@ -103,5 +111,9 @@ public class NormalDijkstra {
         pr.println("Priority Queue Read:"+pq.IOReadCount+" Priority Queue Write:"+pq.IOWriteCount);
         pr.println("Result Read:"+result.IOReadCount+" Result Write:"+result.IOWriteCount);
         pr.println("Total time Pass: " + (System.currentTimeMillis() - start));
+
+        for(Pair p: resultInMemory) {
+            pr.println(p.getKey() + ", " + p.getValue());
+        }
     }
 }

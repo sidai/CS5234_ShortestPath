@@ -1,6 +1,6 @@
 package sssp;
 
-import util.AdjListManager;
+import util.AdjListEntryManager;
 import vo.Neighbor;
 import vo.TournamentNode;
 
@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 public class InMemoryDijkstra {
+    AdjListEntryManager adjListManager;
     PrintWriter pr;
     long start = System.currentTimeMillis();
     private static int NODE_SIZE = 2675656;
@@ -24,7 +25,8 @@ public class InMemoryDijkstra {
     public static int popCount = 0;
 
     public InMemoryDijkstra() throws Exception {
-        String path = "./map-data/result/in-memory.txt";
+        adjListManager = new AdjListEntryManager();
+        String path = "./../map-data/result/in-memory.txt";
         Path pathToFile = Paths.get(path);
         if(!Files.exists(pathToFile)) {
             Files.createDirectories(pathToFile.getParent());
@@ -33,7 +35,7 @@ public class InMemoryDijkstra {
         pr = new PrintWriter(new BufferedWriter(new FileWriter(path)));
     }
 
-    public void dijkstra(int src, int dest) throws Exception {
+    public void dijkstra(int src, int dest, boolean isDest, List<Integer> reportPoints) throws Exception {
         PriorityQueue<TournamentNode> nodeQueue = new PriorityQueue<>();
         // maintain the current optimal cost of unsettled nodes
         Map<Integer, Double> costMap = new HashMap<>();
@@ -58,7 +60,7 @@ public class InMemoryDijkstra {
             }
 
             double dist = nodeWithWeight.getDist();
-            if (curr == dest) {
+            if (curr == dest && isDest) {
                 break;
             }
 
@@ -66,10 +68,10 @@ public class InMemoryDijkstra {
             added[curr] = true;
             result.add(nodeWithWeight);
 
-            if(result.size() == 200) {
+            if(result.size() == dest && !isDest) {
                 break;
             }
-            List<Neighbor> neighbors = AdjListManager.readAdjListEntry(curr);
+            List<Neighbor> neighbors = adjListManager.readAdjListEntry(curr);
 
             for (Neighbor neighbor : neighbors) {
                 int node = neighbor.getId();

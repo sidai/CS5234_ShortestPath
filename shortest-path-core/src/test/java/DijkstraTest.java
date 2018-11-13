@@ -2,6 +2,7 @@ import sssp.CacheEfficientDijkstra;
 import sssp.InMemoryDijkstra;
 import sssp.NormalDijkstra;
 import util.AdjListManager;
+import java.util.*;
 
 public class DijkstraTest {
 
@@ -15,18 +16,31 @@ public class DijkstraTest {
     }
 
     public void testDijkstra() throws Exception {
+        List<Integer> reportPoitns = new ArrayList<>();
+        reportPoitns.add(1000);
+        reportPoitns.add(5000);
+        reportPoitns.add(10000);
         CacheEfficientDijkstra process = new CacheEfficientDijkstra();
-        process.dijkstra(2, 100000);
+        process.dijkstra(2, 100, false, reportPoitns);
     }
 
+
     public void testNormalDijkstra() throws Exception {
+        List<Integer> reportPoitns = new ArrayList<>();
+        reportPoitns.add(1000);
+        reportPoitns.add(5000);
+        reportPoitns.add(10000);
         NormalDijkstra process = new NormalDijkstra();
-        process.dijkstra(2, 100000);
+        process.dijkstra(2, 100000, false, reportPoitns);
     }
 
     public void testInMemoryDijkstra() throws Exception {
+        List<Integer> reportPoitns = new ArrayList<>();
+        reportPoitns.add(1000);
+        reportPoitns.add(5000);
+        reportPoitns.add(10000);
         InMemoryDijkstra process = new InMemoryDijkstra();
-        process.dijkstra(2, 100000);
+        process.dijkstra(2, 100000, false, reportPoitns);
     }
 }
 
