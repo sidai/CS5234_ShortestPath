@@ -7,27 +7,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+
+import util.AdjListManager;
 import util.ExternalResult;
-import util.AdjListEntryManager;
 import util.ExternalPriorityQueue;
 import vo.Neighbor;
 import vo.PQNode;
 
-
-
-
 public class NormalDijkstra {
-
     long start = System.currentTimeMillis();
-    AdjListEntryManager manager;
     PrintWriter pr;
     ExternalResult result;
     ExternalPriorityQueue pq;
-    public NormalDijkstra() throws Exception {
-        manager = new AdjListEntryManager();
+    public NormalDijkstra(String path) throws Exception {
         pq = new ExternalPriorityQueue();
         result = new ExternalResult();
-        String path = "./../map-data/result/normal.txt";
         Path pathToFile = Paths.get(path);
         if(!Files.exists(pathToFile)) {
             Files.createDirectories(pathToFile.getParent());
@@ -36,7 +30,7 @@ public class NormalDijkstra {
         pr = new PrintWriter(new BufferedWriter(new FileWriter(path)));
     }
 
-    public void dijkstra(int src, int dest) throws Exception
+    public void dijkstra(int src, int count) throws Exception
     {
         result.clearAll();
         pq.clearAll();
@@ -58,12 +52,12 @@ public class NormalDijkstra {
             src = nextNode.getNodeId();
             currentDistance = nextNode.getDist();
             pr.println(src + ", " + currentDistance);
-            if(src == dest) {
+            result.insertResult(src, currentDistance);
+            if(result.resultCount == count) {
                 break;
             }
-            result.insertResult(src, currentDistance);
 
-            List<Neighbor> neighbors = manager.readAdjListEntry(src);
+            List<Neighbor> neighbors = AdjListManager.readAdjListEntry(src);
 
             for (Neighbor neighbor : neighbors) {
 //                pr.println("neibhgor "+neighbor.getId());

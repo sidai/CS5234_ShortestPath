@@ -23,8 +23,7 @@ public class InMemoryDijkstra {
     public static int updateCount = 0;
     public static int popCount = 0;
 
-    public InMemoryDijkstra() throws Exception {
-        String path = "./map-data/result/in-memory.txt";
+    public InMemoryDijkstra(String path) throws Exception {
         Path pathToFile = Paths.get(path);
         if(!Files.exists(pathToFile)) {
             Files.createDirectories(pathToFile.getParent());
@@ -33,7 +32,7 @@ public class InMemoryDijkstra {
         pr = new PrintWriter(new BufferedWriter(new FileWriter(path)));
     }
 
-    public void dijkstra(int src, int dest) throws Exception {
+    public void dijkstra(int src, int count) throws Exception {
         PriorityQueue<TournamentNode> nodeQueue = new PriorityQueue<>();
         // maintain the current optimal cost of unsettled nodes
         Map<Integer, Double> costMap = new HashMap<>();
@@ -58,17 +57,14 @@ public class InMemoryDijkstra {
             }
 
             double dist = nodeWithWeight.getDist();
-            if (curr == dest) {
-                break;
-            }
 
             // curr is settled
             added[curr] = true;
             result.add(nodeWithWeight);
-
-            if(result.size() == 200) {
+            if(result.size() == count) {
                 break;
             }
+
             List<Neighbor> neighbors = AdjListManager.readAdjListEntry(curr);
 
             for (Neighbor neighbor : neighbors) {
@@ -94,6 +90,4 @@ public class InMemoryDijkstra {
 
         pr.close();
     }
-
-
 }

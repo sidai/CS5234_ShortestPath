@@ -1,5 +1,6 @@
 package sssp;
 
+import util.AdjListManager;
 import util.Pair;
 import util.AdjListEntryManager;
 import util.TournamentFileManager;
@@ -16,14 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CacheEfficientDijkstra {
-    AdjListEntryManager adjListManager;
     PrintWriter pr;
     long start = System.currentTimeMillis();
 
-    public CacheEfficientDijkstra() throws Exception {
+    public CacheEfficientDijkstra(String path) throws Exception {
         TournamentFileManager.initialize();
-        adjListManager = new AdjListEntryManager();
-        String path = "./map-data/result/cache-eff-1.txt";
         Path pathToFile = Paths.get(path);
         if(!Files.exists(pathToFile)) {
             Files.createDirectories(pathToFile.getParent());
@@ -32,7 +30,7 @@ public class CacheEfficientDijkstra {
         pr = new PrintWriter(new BufferedWriter(new FileWriter(path)));
     }
 
-    public void dijkstra(int src, int dest) throws Exception {
+    public void dijkstra(int src, int count) throws Exception {
         TournamentFileManager.clearAll();
         double currentDistance = 0.0;
 
@@ -49,21 +47,15 @@ public class CacheEfficientDijkstra {
             src = nextNode.getNodeId();
             currentDistance = nextNode.getDist();
             result.add(new Pair(src, currentDistance));
-            if (src == dest) {
+            if (result.size() == count) {
                 break;
             }
-            List<Neighbor> neighbors = adjListManager.readAdjListEntry(src);
+            List<Neighbor> neighbors = AdjListManager.readAdjListEntry(src);
 
             for (Neighbor neighbor : neighbors) {
                 TournamentFileManager.updateDistance(src, neighbor.getId(), currentDistance + neighbor.getDistance());
             }
             resultCount++;
-            if(result.size() % 200 == 0) {
-                System.out.println("Count: " + resultCount + ", Time Pass: " + (System.currentTimeMillis() - start));
-                if (result.size() == 200) {
-                    break;
-                }
-            }
         }
         printNode();
         pr.println("-----------------------------------------------------------------------------------------");

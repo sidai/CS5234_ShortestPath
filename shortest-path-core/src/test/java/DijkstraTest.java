@@ -4,28 +4,30 @@ import sssp.NormalDijkstra;
 import util.AdjListManager;
 
 public class DijkstraTest {
-
     public static void main(String[] args) throws Exception {
         DijkstraTest test = new DijkstraTest();
         String edgeCSV = "./map-data/sorted-graph/edge.csv";
         AdjListManager.loadFromFile(edgeCSV);
-//        test.testDijkstra();
-        test.testInMemoryDijkstra();
-//        test.testNormalDijkstra();
+        test.testDijkstra();
+//        test.testInMemoryDijkstra();
+        test.testNormalDijkstra();
     }
 
     public void testDijkstra() throws Exception {
-        CacheEfficientDijkstra process = new CacheEfficientDijkstra();
+        String path = "./map-data/result/cache-eff.txt";
+        CacheEfficientDijkstra process = new CacheEfficientDijkstra(path);
         process.dijkstra(2, 100000);
     }
 
     public void testNormalDijkstra() throws Exception {
-        NormalDijkstra process = new NormalDijkstra();
+        String path = "./map-data/result/normal.txt";
+        NormalDijkstra process = new NormalDijkstra(path);
         process.dijkstra(2, 100000);
     }
 
     public void testInMemoryDijkstra() throws Exception {
-        InMemoryDijkstra process = new InMemoryDijkstra();
+        String path = "./map-data/result/in-memory.txt";
+        InMemoryDijkstra process = new InMemoryDijkstra(path);
         process.dijkstra(2, 100000);
     }
 }
