@@ -107,6 +107,8 @@ public class NormalDijkstra {
             if (result.resultCount % 1000 == 0) {
                 System.out.println("report at "+result.resultCount+"----------------------------------------");
                 System.out.println("Time Pass: " + (System.currentTimeMillis() - start));
+                System.out.println("Priority Queue Read:"+pq.IOReadCount+" Priority Queue Write:"+pq.IOWriteCount);
+                System.out.println("Result Read:"+result.IOReadCount+" Result Write:"+result.IOWriteCount);
             }
         }
         pr.println("-----------------------------------------------------------------------------------------");
