@@ -62,6 +62,10 @@ public class TournamentTreeEdgeUtil {
         file.createNewFile();
     }
 
+    public void destory() throws Exception {
+        file.delete();
+    }
+
     public void resetMinAmongChild() {
         this.minAmongChild = maxElements.isEmpty() ? Double.MAX_VALUE : maxElements.peek().getDist();
     }
@@ -74,7 +78,7 @@ public class TournamentTreeEdgeUtil {
         return minElements.size() == 0;
     }
 
-    public void removeElement(Pair<Integer, Integer> key) {
+    public void removeElement(Pair<Integer, Integer> key) throws Exception {
         TournamentEdge edge = elementsRef.remove(key);
         minElements.remove(edge);
         maxElements.remove(edge);
@@ -139,23 +143,19 @@ public class TournamentTreeEdgeUtil {
         }
     }
 
-    public void setBuffer(Map<Pair<Integer, Integer>, OperationEdge> buffer){
-        this.buffer = buffer;
-    }
-
     public TournamentEdge findMin() throws Exception{
         if (minElements.isEmpty()) {
             TournamentFileManager.fillup(this);
         }
-        return minElements.isEmpty() ? null : minElements.peek();
+        return minElements.peek();
     }
 
-    // findMin must be called before any deleteMin so that the elements is loaded.
-    public void deleteMin() throws Exception{
-        TournamentEdge root = minElements.poll();
-        elementsRef.remove(new Pair<>(root.getFromNode(), root.getToNode()));
-        maxElements.remove(root);
-        bufferDeleteOp(root.getFromNode(), root.getToNode());
+    public TournamentEdge extractMin() throws Exception {
+        TournamentEdge min = minElements.peek();
+        if (min != null) {
+            removeElement(new Pair<>(min.getFromNode(), min.getToNode()));
+        }
+        return min;
     }
 
     public void updateDistance(int fromNode, int toNode, double dist) throws Exception{
@@ -163,7 +163,9 @@ public class TournamentTreeEdgeUtil {
         // in this case there is never a operation of this node in the buffer
         Pair<Integer, Integer> key = new Pair<>(fromNode, toNode);
         if (elementsRef.containsKey(key)) {
+            System.out.println("Fail " + key.getKey() +", " + key.getValue());
             TournamentEdge duplicate = elementsRef.get(key);
+//            System.exit(1);
             if(duplicate.getDist() > dist) {
                 removeElement(key);
                 addElement(fromNode, toNode, dist);
@@ -224,10 +226,16 @@ public class TournamentTreeEdgeUtil {
 
     public void deleteElement(int fromNode, int toNode) throws Exception{
         Pair<Integer, Integer> key = new Pair<>(fromNode, toNode);
+        //when delete a pre-inserted edge, we ensure there is exactly one copy in the tree
         if (elementsRef.containsKey(key)) {
             removeElement(key);
+        } else {
+            if (buffer.containsKey(key)) {
+                buffer.remove(key);
+            } else {
+                bufferDeleteOp(fromNode, toNode);
+            }
         }
-        bufferDeleteOp(fromNode, toNode);
     }
 
 

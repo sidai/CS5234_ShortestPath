@@ -18,7 +18,7 @@ public class TournamentFileManager {
     public static TournamentTreeNodeUtil nodeRoot;
     public static TournamentTreeEdgeUtil edgeRoot;
     private static int NODE_SIZE = 93149;
-    private static int EDGE_SIZE = 236948;
+    private static int EDGE_SIZE = 232362;
     private static String EDGE_DIRECTORY = "./map-data/edge-pq/";
     private static String NODE_DIRECTORY = "./map-data/node-pq/";
     private static String RANGE_PATTERN = "%d-%d.csv";
@@ -265,47 +265,32 @@ public class TournamentFileManager {
         }
 
         boolean isNotFull = true;
-        int leftPointer = 0;
-        int rightPointer = 0;
-        List<TournamentEdge> leftElements = new ArrayList<>(leftChild.getElements());
-        List<TournamentEdge> rightElements = new ArrayList<>(rightChild.getElements());
-        if(leftElements.size() == 0 && !leftCommit) {
-            fillup(leftChild);
-            leftElements = new ArrayList<>(leftChild.getElements());
-        }
-
-        if(rightElements.size() == 0 && !rightCommit) {
-            fillup(rightChild);
-            rightElements = new ArrayList<>(rightChild.getElements());
-        }
-
-        leftElements.sort(Comparator.comparingDouble(TournamentEdge::getDist));
-        rightElements.sort(Comparator.comparingDouble(TournamentEdge::getDist));
 
         while (isNotFull){
-            if(leftPointer < leftElements.size() && rightPointer < rightElements.size()) {
-                TournamentEdge left = leftElements.get(leftPointer);
-                TournamentEdge right = rightElements.get(rightPointer);
-                TournamentEdge next = null;
-                if (left.getDist() <= right.getDist()) {
-                    next = left;
-                    leftPointer++;
-                } else {
-                    next = right;
-                    rightPointer++;
-                }
-                isNotFull = tEdge.addElement(next);
-            } else if(leftPointer < leftElements.size()){
-                TournamentEdge next = leftElements.get(leftPointer);
-                isNotFull = tEdge.addElement(next);
-                leftPointer++;
-            } else if(rightPointer < rightElements.size()){
-                TournamentEdge next = rightElements.get(rightPointer);
-                isNotFull = tEdge.addElement(next);
-                rightPointer++;
-            } else {
+            TournamentEdge left = leftChild.findMin();
+            TournamentEdge right = rightChild.findMin();
+            // no more elements in children
+            if(left == null && right == null) {
                 break;
+            } else if(left == null) {
+                isNotFull = tEdge.addElement(rightChild.extractMin());
+            } else if(right == null) {
+                isNotFull = tEdge.addElement(leftChild.extractMin());
+            } else {
+                if (left.getDist() <= right.getDist()) {
+                    isNotFull = tEdge.addElement(leftChild.extractMin());
+                } else {
+                    isNotFull = tEdge.addElement(rightChild.extractMin());
+                }
             }
+        }
+
+        if(leftChild.isEmpty()) {
+            leftChild.destory();
+        }
+
+        if(rightChild.isEmpty()) {
+            rightChild.destory();
         }
 
         tEdge.resetMinAmongChild();
@@ -409,24 +394,18 @@ public class TournamentFileManager {
 
     private static Pair<TournamentTreeNodeUtil, Boolean> getChildTreeNode(int start, int end) throws Exception{
         File file = new File(NODE_DIRECTORY + String.format(RANGE_PATTERN, start, end));
-        boolean isLeaf;
-
-        int middle = (start + end)/2;
-        File leftChild = new File(NODE_DIRECTORY + String.format(RANGE_PATTERN, start, middle));
-        File rightChild = new File(NODE_DIRECTORY + String.format(RANGE_PATTERN, middle, end));
+        boolean exists;
 
         TournamentTreeNodeUtil node = new TournamentTreeNodeUtil(file);
         if (file.exists()) {
             node.readFromFile();
             IONodeReadCount++;
-            isLeaf = true;
-        } else if(!leftChild.exists() && !rightChild.exists()){
-            isLeaf = true;
-        } else{
-            isLeaf = false;
+            exists = true;
+        } else {
+            exists = false;
         }
 
-        return new Pair<>(node, isLeaf);
+        return new Pair<>(node, exists);
 
     }
 
