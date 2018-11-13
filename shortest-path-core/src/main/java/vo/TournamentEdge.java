@@ -42,7 +42,7 @@ public class TournamentEdge implements Comparable<TournamentEdge> {
         if(obj == null){
             return false;
         }
-        if(!TournamentNode.class.isAssignableFrom(obj.getClass())){
+        if(!TournamentEdge.class.isAssignableFrom(obj.getClass())){
             return false;
         }
         final TournamentEdge other = (TournamentEdge) obj;
@@ -75,5 +75,10 @@ public class TournamentEdge implements Comparable<TournamentEdge> {
 
     public String[] getString() {
         return new String[]{String.valueOf(fromNode), String.valueOf(toNode), String.valueOf(dist)};
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(fromNode) + ", " + String.valueOf(toNode) + ", " + String.valueOf(dist);
     }
 }

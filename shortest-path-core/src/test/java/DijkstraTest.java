@@ -1,23 +1,26 @@
 import org.junit.Test;
 import sssp.CacheEfficientDijkstra;
+import sssp.InMemoryDijkstra;
 import sssp.NormalDijkstra;
-import util.TournamentFileManager;
 
-public class CacheEfficientNormalDijkstraTest {
+public class DijkstraTest {
 
     @Test
     public void testDijkstra() throws Exception {
         CacheEfficientDijkstra process = new CacheEfficientDijkstra();
-        process.dijkstra(2, 2641782);
-        System.out.println(TournamentFileManager.edgeRoot.getElements().size());
-        System.out.println(TournamentFileManager.edgeRoot.getElementsRef().size());
-        System.out.println(TournamentFileManager.edgeRoot.getBuffer().size());
+        process.dijkstra(2, 100000);
     }
 
     @Test
     public void testNormalDijkstra() throws Exception {
         NormalDijkstra process = new NormalDijkstra();
         process.dijkstra(2, 2641782);
+    }
+
+    @Test
+    public void testInMemoryDijkstra() throws Exception {
+        InMemoryDijkstra process = new InMemoryDijkstra();
+        process.dijkstra(2, 100000);
     }
 }
 

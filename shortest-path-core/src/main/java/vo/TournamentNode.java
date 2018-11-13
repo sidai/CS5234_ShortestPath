@@ -40,9 +40,10 @@ public class TournamentNode implements Comparable<TournamentNode> {
             return false;
         }
         final TournamentNode other = (TournamentNode) obj;
-        if(this.nodeId!=other.getNodeId()){
+        if(this.nodeId != other.getNodeId()){
             return false;
         }
+
         return true;
     }
 
@@ -64,5 +65,10 @@ public class TournamentNode implements Comparable<TournamentNode> {
 
     public String[] getString() {
         return new String[]{String.valueOf(nodeId), String.valueOf(dist)};
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(nodeId) + ", " + String.valueOf(dist);
     }
 }

@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.*;
 
@@ -33,6 +32,13 @@ public class TournamentFileManager {
     public static int IONodeReadCount = 0;
     public static int IONodeWriteCount = 0;
 
+    public static int nodeUpdateCount = 0;
+    public static int nodeDeleteCount = 0;
+    public static int nodePopCount = 0;
+
+    public static int edgeUpdateCount = 0;
+    public static int edgeDeleteCount = 0;
+    public static int edgePopCount = 0;
 
     public static void initialize() throws IOException {
         Path pathToFile = Paths.get(EDGE_DIRECTORY);
@@ -48,14 +54,12 @@ public class TournamentFileManager {
         nodeRoot = new TournamentTreeNodeUtil(new File(NODE_DIRECTORY + String.format(RANGE_PATTERN, 0, NODE_SIZE)));
         edgeRoot = new TournamentTreeEdgeUtil(new File(EDGE_DIRECTORY + String.format(RANGE_PATTERN, 0, NODE_SIZE)));
     }
-//
-//    public static void initSource(int sourceId) {
-//
-//    }
 
     public static void updateDistance(int fromNode, int toNode, double dist) throws Exception{
         nodeRoot.updateDistance(toNode, dist);
+        nodeUpdateCount++;
         edgeRoot.updateDistance(fromNode, toNode, dist);
+        edgeUpdateCount++;
     }
 
     public static void clearAll() {
@@ -76,20 +80,25 @@ public class TournamentFileManager {
 
     public static TournamentNode extractMinNode() throws Exception{
         TournamentNode minNode = nodeRoot.findMin();
+        nodePopCount++;
         TournamentEdge minEdge = edgeRoot.findMin();
+        edgePopCount++;
         if (minNode.getDist() <= minEdge.getDist()) {
             nodeRoot.deleteElement(minNode.getNodeId());
+            nodeDeleteCount++;
             return minNode;
         } else {
             edgeRoot.deleteElement(minEdge.getFromNode(), minEdge.getToNode());
+            edgeDeleteCount++;
             nodeRoot.deleteElement(minEdge.getFromNode());
+            nodeDeleteCount++;
             return extractMinNode();
         }
     }
 
     public static void empty(TournamentTreeNodeUtil tNode) throws Exception {
         System.out.println("Empty node");
-        String[] range = tNode.getFile().getName().split(".")[0].split("-");
+        String[] range = tNode.getFile().getName().split("\\.")[0].split("-");
         int start = Integer.parseInt(range[0]);
         int end = Integer.parseInt(range[1]);
         int middle = (start + end)/2;
@@ -159,7 +168,7 @@ public class TournamentFileManager {
 
     public static void empty(TournamentTreeEdgeUtil tEdge) throws Exception {
         System.out.println("Empty edge");
-        String[] range = tEdge.getFile().getName().split(".")[0].split("-");
+        String[] range = tEdge.getFile().getName().split("\\.")[0].split("-");
         int start = Integer.parseInt(range[0]);
         int end = Integer.parseInt(range[1]);
         int middle = (start + end)/2;
@@ -229,7 +238,7 @@ public class TournamentFileManager {
 
     public static void fillup(TournamentTreeEdgeUtil tEdge) throws Exception{
         System.out.println("fill-up edge");
-        String[] range = tEdge.getFile().getName().split(".")[0].split("-");
+        String[] range = tEdge.getFile().getName().split("\\.")[0].split("-");
         int start = Integer.parseInt(range[0]);
         int end = Integer.parseInt(range[1]);
         int middle = (start + end)/2;
@@ -275,6 +284,9 @@ public class TournamentFileManager {
             rightElements = new ArrayList<>(rightChild.getElements());
         }
 
+        Collections.sort(leftElements);
+        Collections.sort(rightElements);
+
         while (isNotFull){
             if(leftPointer < leftElements.size() && rightPointer < rightElements.size()) {
                 TournamentEdge left = leftElements.get(leftPointer);
@@ -314,7 +326,7 @@ public class TournamentFileManager {
 
     public static void fillup(TournamentTreeNodeUtil tNode) throws Exception{
         System.out.println("fill-up node");
-        String[] range = tNode.getFile().getName().split(".")[0].split("-");
+        String[] range = tNode.getFile().getName().split("\\.")[0].split("-");
         int start = Integer.parseInt(range[0]);
         int end = Integer.parseInt(range[1]);
         int middle = (start + end)/2;
@@ -360,6 +372,9 @@ public class TournamentFileManager {
             fillup(rightChild);
             rightElements = new ArrayList<>(rightChild.getElements());
         }
+
+        Collections.sort(leftElements);
+        Collections.sort(rightElements);
 
         while (isNotFull){
             if(leftPointer < leftElements.size() && rightPointer < rightElements.size()) {

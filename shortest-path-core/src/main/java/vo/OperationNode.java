@@ -57,6 +57,11 @@ public class OperationNode {
         return new String[]{String.valueOf(operation), String.valueOf(id), String.valueOf(value)};
     }
 
+    @Override
+    public String toString() {
+        return String.valueOf(operation) + ", " + String.valueOf(id) + ", " + String.valueOf(value);
+    }
+
     public enum OpType {
         UPDATE('U'),
         DELETE('D');

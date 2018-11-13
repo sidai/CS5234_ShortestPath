@@ -19,16 +19,26 @@ import java.io.Writer;
 import java.util.*;
 
 public class TournamentTreeNodeUtil {
-
     private File file;
-    private TreeSet<TournamentNode> elements;
+    private PriorityQueue<TournamentNode> minElements;
+    private PriorityQueue<TournamentNode> maxElements;
     private Map<Integer, TournamentNode> elementsRef;
     private Map<Integer, OperationNode> buffer;
     private double minAmongChild;
 
     public TournamentTreeNodeUtil(File file) {
         this.file = file;
-        elements = new TreeSet<>();
+        minElements = new PriorityQueue<>();
+        maxElements = new PriorityQueue<>(new Comparator<TournamentNode>() {
+            @Override
+            public int compare(TournamentNode o1, TournamentNode o2) {
+                if (o2.getDist() < o1.getDist())
+                    return -1;
+                if (o2.getDist() > o1.getDist())
+                    return 1;
+                return 0;
+            }
+        });
         elementsRef = new HashMap<>();
         buffer = new HashMap<>();
         minAmongChild = Double.MAX_VALUE;
@@ -39,7 +49,7 @@ public class TournamentTreeNodeUtil {
     }
 
     public void resetMinAmongChild() {
-        this.minAmongChild = elements.isEmpty() ? Double.MAX_VALUE : elements.last().getDist();
+        this.minAmongChild = maxElements.isEmpty() ? Double.MAX_VALUE : maxElements.peek().getDist();
     }
 
     public void executeOp(OperationNode op) throws Exception {
@@ -50,10 +60,23 @@ public class TournamentTreeNodeUtil {
         }
     }
 
+    public void removeElement(int id) {
+        TournamentNode node = elementsRef.remove(id);
+        minElements.remove(node);
+        maxElements.remove(node);
+    }
+
+    public void addElement(int id, double dist) {
+        TournamentNode node = new TournamentNode(id, dist);
+        elementsRef.put(id, node);
+        minElements.add(node);
+        maxElements.add(node);
+    }
+
     public void commitOp(OperationNode op) throws Exception {
         if (elementsRef.containsKey(op.getId())) {
             if (OpType.DELETE.equals(op.getOperation())) {
-                elements.remove(elementsRef.remove(op.getId()));
+                removeElement(op.getId());
             } else if (OpType.UPDATE.equals(op.getOperation())) {
                 TournamentNode node = elementsRef.get(op.getId());
                 if (node.getDist() > op.getValue()) {
@@ -62,20 +85,17 @@ public class TournamentTreeNodeUtil {
             }
         } else {
             if (OpType.UPDATE.equals(op.getOperation())) {
-                TournamentNode node = new TournamentNode(op.getId(), op.getValue());
-                elements.add(node);
-                elementsRef.put(op.getId(), node);
+                addElement(op.getId(), op.getValue());
             }
         }
     }
 
     public boolean isFull(){
-        return elements.size()>=ConfigManager.getMemorySize();
+        return minElements.size()>=ConfigManager.getMemorySize();
     }
 
-    public boolean addElement(TournamentNode element){
-        elementsRef.put(element.getNodeId(), element);
-        elements.add(element);
+    public boolean addElement(TournamentNode element) {
+        addElement(element.getNodeId(), element.getDist());
         return isFull();
     }
 
@@ -87,33 +107,27 @@ public class TournamentTreeNodeUtil {
         return elementsRef;
     }
 
-    public TreeSet<TournamentNode> getElements() {
-        return elements;
+    public PriorityQueue<TournamentNode> getElements() {
+        return minElements;
     }
 
-    public void setElementsRef(Map<Integer,TournamentNode> elementsRef){
-        this.elementsRef = elementsRef;
-        this.elements = new TreeSet<>(elementsRef.values());
-    }
 
     public Map<Integer, OperationNode> getBuffer() {
         return buffer;
     }
-    public void setBuffer(Map<Integer, OperationNode> buffer){
-        this.buffer = buffer;
-    }
 
     public TournamentNode findMin() throws Exception{
-        if (elements.isEmpty()) {
+        if (minElements.isEmpty()) {
             TournamentFileManager.fillup(this);
         }
-        return elements.isEmpty() ? null : elements.first();
+        return minElements.isEmpty() ? null : minElements.peek();
     }
 
     // findMin must be called before any deleteMin so that the elements is loaded.
     public void deleteMin() throws Exception{
-        TournamentNode root = elements.pollFirst();
+        TournamentNode root = minElements.poll();
         elementsRef.remove(root.getNodeId());
+        maxElements.remove(root);
         bufferDeleteOp(root.getNodeId());
     }
 
@@ -129,12 +143,10 @@ public class TournamentTreeNodeUtil {
         //elements doesn't contain the node, check if need to insert into elements.
         else {
             if (minAmongChild >= dist) {
-                TournamentNode node = new TournamentNode(id, dist);
-                elements.add(node);
-                elementsRef.put(id, node);
-                if (elements.size() > ConfigManager.getMemorySize()) {
-                    TournamentNode toBuffer = elements.pollLast();
-                    elementsRef.remove(toBuffer.getNodeId());
+                addElement(id, dist);
+                if (minElements.size() > ConfigManager.getMemorySize()) {
+                    TournamentNode toBuffer = maxElements.peek();
+                    removeElement(toBuffer.getNodeId());
                     bufferUpdateOp(toBuffer.getNodeId(), toBuffer.getDist());
                 }
             } else {
@@ -160,7 +172,8 @@ public class TournamentTreeNodeUtil {
 
     public void deleteElement(int id) throws Exception{
         if (elementsRef.containsKey(id)) {
-            elements.remove(elementsRef.remove(id));
+            TournamentNode node = elementsRef.get(id);
+            removeElement(node.getNodeId());
         }
         bufferDeleteOp(id);
     }
@@ -179,9 +192,9 @@ public class TournamentTreeNodeUtil {
             CsvWriterSettings settings = new CsvWriterSettings();
             settings.setQuoteAllFields(true);
             CsvWriter csvWriter = new CsvWriter(writer, settings);
-            csvWriter.writeRow(String.valueOf(elements.size()), String.valueOf(buffer.size()), String.valueOf(minAmongChild));
+            csvWriter.writeRow(String.valueOf(minElements.size()), String.valueOf(buffer.size()), String.valueOf(minAmongChild));
 
-            for(TournamentNode node: elements) {
+            for(TournamentNode node: minElements) {
                 csvWriter.writeRow(node.getString());
             }
 
@@ -198,6 +211,7 @@ public class TournamentTreeNodeUtil {
             parser.beginParsing(reader);
             String[] count = parser.parseNext();
 
+            System.out.println(file.getName());
             minAmongChild = Double.parseDouble(count[2]);
 
             String[] nodeString;
@@ -210,7 +224,8 @@ public class TournamentTreeNodeUtil {
                 elements.add(node);
                 elementsRef.put(id, node);
             }
-            this.elements.addAll(elements);
+            this.minElements.addAll(elements);
+            this.maxElements.addAll(elements);
 
             for (int i = 0; i < Integer.parseInt(count[1]); i++) {
                 nodeString = parser.parseNext();

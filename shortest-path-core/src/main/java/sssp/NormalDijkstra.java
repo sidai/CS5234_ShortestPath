@@ -78,9 +78,11 @@ public class NormalDijkstra {
 //                System.out.println(pq.popTime+" "+pq.insertTime +" "+pq.updateTime+" "+pq.retrieveTime);
 //                System.out.println(result.insertTime+" "+result.retrieveTime);
                 System.out.println("Time Pass: " + (System.currentTimeMillis() - start));
-
             }
         }
+        System.out.println("-----------------------------------------------------------------------------------------");
+        System.out.println("Result count: " + result.resultCount);
+        System.out.println("PQOperation: " + pq.popTime+" "+pq.insertTime +" "+pq.updateTime+" "+pq.retrieveTime);
         System.out.println("Priority Queue Read:"+pq.IOReadCount+" Priority Queue Write:"+pq.IOWriteCount);
         System.out.println("Result Read:"+result.IOReadCount+" Result Write:"+result.IOWriteCount);
         System.out.println("Total time Pass: " + (System.currentTimeMillis() - start));
