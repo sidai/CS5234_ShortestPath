@@ -11,3 +11,6 @@ shortest-path-core/map-data/
 *.pdf
 shortest-path-core/src/main/java/sssp/Preprocessing.java
 map-data/sorted-graph/edge.csv
+map-data/result/cache-eff1.txt
+map-data/result/in-memory.txt
+map-data/result/normal.txt

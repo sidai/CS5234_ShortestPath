@@ -112,9 +112,14 @@ public class ExternalPriorityQueue {
         final long startTime = System.currentTimeMillis();
         int parentIndex = parent(node.getPqIndex());
         PQNode parent = retrievePQNode(parentIndex);
+        boolean needSwap = false;
         while(!parent.equals(node) && node.compareTo(parent)<0){
+            needSwap = true;
             swap(node,parent);
             parent = retrievePQNode(parent(node.getPqIndex()));
+        }
+        if(!needSwap){
+            updateToFile(node);
         }
         final long endTime = System.currentTimeMillis();
         updateTime += endTime - startTime;

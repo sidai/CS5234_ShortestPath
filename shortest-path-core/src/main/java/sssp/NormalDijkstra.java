@@ -68,6 +68,9 @@ public class NormalDijkstra {
             for (Neighbor neighbor : neighbors) {
 //                pr.println("neibhgor "+neighbor.getId());
                 double distance = neighbor.getDistance() + currentDistance;
+                if(neighbor.getId()==1801674){
+                    int a=-1;
+                }
                 PQNode pqnode = new PQNode(neighbor.getId(),distance);
                 //check node already in result files
 //                pr.println("get result "+result.retrieveCost(pqnode.getNodeId()));
