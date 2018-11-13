@@ -90,9 +90,9 @@ public class InMemoryDijkstra {
         pr.println("Priority Queue Pop: " + popCount + " Priority Queue Update: " + updateCount);
         pr.println("Total time Pass: " + (System.currentTimeMillis() - start));
 
-        for(TournamentNode node: result) {
-            pr.println(node.getNodeId() + ", " + node.getDist());
-        }
+//        for(TournamentNode node: result) {
+//            pr.println(node.getNodeId() + ", " + node.getDist());
+//        }
 
         pr.close();
     }
