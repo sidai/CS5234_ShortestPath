@@ -17,12 +17,6 @@ public class AdjListEntryManager {
     private static String DIRECTORY = "./../map-data/adjacency-list/";
     private static String NAME_PATTERN = "ADJACENCY_LIST_ENTRY_[%d-%d).csv";
 
-//
-//    private static int ENTRY_BLOCK_SIZE = 10;
-//    private static int NODE_SIZE = 27;
-//    private static String DIRECTORY = "./map-data/test-list/";
-//    private static String NAME_PATTERN = "ADJACENCY_LIST_ENTRY_[%d-%d).csv";
-
     Map<File, AdjListEntryBlockUtil> blockMap;
     AdjListEntryIndex adjListEntryIndex;
 
