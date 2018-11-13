@@ -4,6 +4,7 @@ import com.opencsv.CSVReader;
 import util.AdjListEntryManager;
 import util.EdgeUtil;
 //import util.GraphUtil;
+import util.GraphUtil;
 import util.NodeUtil;
 import vo.Neighbor;
 
@@ -21,8 +22,8 @@ public class Preprocessing {
     public void run() {
         try {
 //            parseOSMMap();
-//            prepareEdgeList();
-            prepareAdjList();
+            prepareEdgeList();
+//            prepareAdjList();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -47,50 +48,52 @@ public class Preprocessing {
 
     private void prepareEdgeList() throws Exception {
         EdgeUtil edgeUtil = new EdgeUtil();
-        String edgeCSV =  "./../map-data/graph/edge.csv";
-        String edgeStoreCSV = "./../map-data/sorted-graph/edge.csv";
+        String edgeCSV =  "./map-data/graph/sin/edge.csv";
+//        String edgeStoreCSV = "./map-data/sorted-graph/sin/edge.csv";
 
         CSVReader reader = new CSVReader(new FileReader(edgeCSV));
         reader.readNext();
         System.out.println("Start");
         String [] lines; //skip header
         while ((lines = reader.readNext()) != null) {
-            int from = Integer.valueOf(lines[1]);
-            int to = Integer.valueOf(lines[2]);
-            double dist = Double.valueOf(lines[3]);
-            edgeUtil.addEdge(from, to, dist);
-            edgeUtil.addEdge(to, from, dist);
+//            int from = Integer.valueOf(lines[0]);
+//            int to = Integer.valueOf(lines[1]);
+//            double dist = Double.valueOf(lines[2]);
+
+            edgeUtil.addEdge(0, 0, 0);
+//            edgeUtil.addEdge(from, to, dist);
+//            edgeUtil.addEdge(to, from, dist);
         }
-        edgeUtil.sort();
+//        edgeUtil.sort();
         System.out.println(edgeUtil.getEdgeSize());
-        edgeUtil.storeToCSV(edgeStoreCSV);
+//        edgeUtil.storeToCSV(edgeStoreCSV);
     }
 
-//    private void parseOSMMap() {
-//        String osmPath = "./map-data/osm/texas-latest.osm.pbf";
-//        String hopperLocation = "./map-data/hopper/texas";
-//        String nodeCSV =  "./map-data/graph/node.csv";
-//        String edgeCSV =  "./map-data/graph/edge.csv";
-//        GraphUtil graphUtil = getMapInfo(osmPath, hopperLocation);
-//        storeNodeEdgeInfo(graphUtil, nodeCSV, edgeCSV);
-//        System.out.println("Done with China");
-//    }
-//
-//    private void storeNodeEdgeInfo(GraphUtil graphUtil, String nodeCSV, String edgeCSV) {
-//        try {
-//            NodeUtil nodeUtil = graphUtil.getNodeUtil();
-//            nodeUtil.storeToCSV(nodeCSV);
-//
-//            EdgeUtil edgeUtil = graphUtil.getEdgeUtil();
-//            edgeUtil.storeToCSV(edgeCSV);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
+    private void parseOSMMap() {
+        String osmPath = "./map-data/osm/Singapore.osm.pbf";
+        String hopperLocation = "./map-data/hopper/singapore";
+        String nodeCSV =  "./map-data/graph/sin/node.csv";
+        String edgeCSV =  "./map-data/graph/sin/edge.csv";
+        GraphUtil graphUtil = getMapInfo(osmPath, hopperLocation);
+        storeNodeEdgeInfo(graphUtil, nodeCSV, edgeCSV);
+        System.out.println("Done with Singapore");
+    }
 
-//    private GraphUtil getMapInfo(String osmPath, String hopperLocation) {
-//        GraphUtil graphUtil = new GraphUtil();
-//        graphUtil.loadAndStore(osmPath, hopperLocation);
-//        return graphUtil;
-//    }
+    private void storeNodeEdgeInfo(GraphUtil graphUtil, String nodeCSV, String edgeCSV) {
+        try {
+            NodeUtil nodeUtil = graphUtil.getNodeUtil();
+            nodeUtil.storeToCSV(nodeCSV);
+
+            EdgeUtil edgeUtil = graphUtil.getEdgeUtil();
+            edgeUtil.storeToCSV(edgeCSV);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private GraphUtil getMapInfo(String osmPath, String hopperLocation) {
+        GraphUtil graphUtil = new GraphUtil();
+        graphUtil.loadAndStore(osmPath, hopperLocation);
+        return graphUtil;
+    }
 }

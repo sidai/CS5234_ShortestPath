@@ -61,9 +61,11 @@ public class CacheEfficientDijkstra {
             if (result.size() == dest && !isDest) {
                 break;
             }
-            if (result.size() % 1000 == 0) {
+            if (result.size() % 20 == 0) {
                 System.out.println("report at "+result.size()+"----------------------------------------");
                 System.out.println("Time Pass: " + (System.currentTimeMillis() - start));
+                System.out.println("Edge Priority Queue Read:"+TournamentFileManager.IOEdgeReadCount+" Edge Priority Queue Write:"+TournamentFileManager.IOEdgeWriteCount);
+                System.out.println("Node Priority Queue Read:"+TournamentFileManager.IONodeReadCount+" Node Priority Queue Write:"+TournamentFileManager.IONodeWriteCount);
             }
         }
 //        printNode();

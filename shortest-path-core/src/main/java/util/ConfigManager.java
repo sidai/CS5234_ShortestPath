@@ -2,7 +2,7 @@ package util;
 
 public class ConfigManager {
 
-    private static int MEMORY_SIZE = 3200;
+    private static int MEMORY_SIZE = 200;
     private static int NODE_SIZE = 2675656;
 
     public static int getMemorySize() {

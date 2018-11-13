@@ -17,9 +17,8 @@ public class TournamentFileManager {
 
     public static TournamentTreeNodeUtil nodeRoot;
     public static TournamentTreeEdgeUtil edgeRoot;
-    private static int ENTRY_BLOCK_SIZE = 3200;
-    private static int NODE_SIZE = 2675656;
-    private static int EDGE_SIZE = 3602918;
+    private static int NODE_SIZE = 93149;
+    private static int EDGE_SIZE = 236948;
     private static String EDGE_DIRECTORY = "./map-data/edge-pq/";
     private static String NODE_DIRECTORY = "./map-data/node-pq/";
     private static String RANGE_PATTERN = "%d-%d.csv";
@@ -102,11 +101,11 @@ public class TournamentFileManager {
 
         Pair<TournamentTreeNodeUtil, Boolean> leftPair = getChildTreeNode(start, middle);
         TournamentTreeNodeUtil leftChild = leftPair.getKey();
-        boolean leftCommit = (middle - start <= ENTRY_BLOCK_SIZE) || !leftPair.getValue();
+        boolean leftCommit = (middle - start <= ConfigManager.getMemorySize()) || !leftPair.getValue();
 
         Pair<TournamentTreeNodeUtil, Boolean> rightPair = getChildTreeNode(middle, end);
         TournamentTreeNodeUtil rightChild = rightPair.getKey();
-        boolean rightCommit = (end - middle <= ENTRY_BLOCK_SIZE) || !rightPair.getValue();
+        boolean rightCommit = (end - middle <= ConfigManager.getMemorySize()) || !rightPair.getValue();
 
         Pair<List<OperationNode>, List<OperationNode>> ops = splitNodeOperation(tNode.getBuffer(), middle);
 
@@ -171,11 +170,11 @@ public class TournamentFileManager {
 
         Pair<TournamentTreeEdgeUtil, Boolean> leftPair = getChildTreeEdge(start, middle);
         TournamentTreeEdgeUtil leftChild = leftPair.getKey();
-        boolean leftCommit = (middle - start <= ENTRY_BLOCK_SIZE) || !leftPair.getValue();
+        boolean leftCommit = (middle - start <= ConfigManager.getMemorySize()) || !leftPair.getValue();
 
         Pair<TournamentTreeEdgeUtil, Boolean> rightPair = getChildTreeEdge(middle, end);
         TournamentTreeEdgeUtil rightChild = rightPair.getKey();
-        boolean rightCommit = (end - middle <= ENTRY_BLOCK_SIZE) || !rightPair.getValue();
+        boolean rightCommit = (end - middle <= ConfigManager.getMemorySize()) || !rightPair.getValue();
 
         Pair<List<OperationEdge>, List<OperationEdge>> ops = splitEdgeOperation(tEdge.getBuffer(), middle);
 
@@ -240,11 +239,11 @@ public class TournamentFileManager {
 
         Pair<TournamentTreeEdgeUtil, Boolean> leftPair = getChildTreeEdge(start, middle);
         TournamentTreeEdgeUtil leftChild = leftPair.getKey();
-        boolean leftCommit = (middle - start <= ENTRY_BLOCK_SIZE) || !leftPair.getValue();
+        boolean leftCommit = (middle - start <= ConfigManager.getMemorySize()) || !leftPair.getValue();
 
         Pair<TournamentTreeEdgeUtil, Boolean> rightPair = getChildTreeEdge(middle, end);
         TournamentTreeEdgeUtil rightChild = rightPair.getKey();
-        boolean rightCommit = (end - middle <= ENTRY_BLOCK_SIZE) || !rightPair.getValue();
+        boolean rightCommit = (end - middle <= ConfigManager.getMemorySize()) || !rightPair.getValue();
 
         Pair<List<OperationEdge>, List<OperationEdge>> ops = splitEdgeOperation(tEdge.getBuffer(), middle);
 
@@ -327,11 +326,11 @@ public class TournamentFileManager {
 
         Pair<TournamentTreeNodeUtil, Boolean> leftPair = getChildTreeNode(start, middle);
         TournamentTreeNodeUtil leftChild = leftPair.getKey();
-        boolean leftCommit = (middle - start <= ENTRY_BLOCK_SIZE) || !leftPair.getValue();
+        boolean leftCommit = (middle - start <= ConfigManager.getMemorySize()) || !leftPair.getValue();
 
         Pair<TournamentTreeNodeUtil, Boolean> rightPair = getChildTreeNode(middle, end);
         TournamentTreeNodeUtil rightChild = rightPair.getKey();
-        boolean rightCommit = (end - middle <= ENTRY_BLOCK_SIZE) || !rightPair.getValue();
+        boolean rightCommit = (end - middle <= ConfigManager.getMemorySize()) || !rightPair.getValue();
 
         Pair<List<OperationNode>, List<OperationNode>> ops = splitNodeOperation(tNode.getBuffer(), middle);
 
