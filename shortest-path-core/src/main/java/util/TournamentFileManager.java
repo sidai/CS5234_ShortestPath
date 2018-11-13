@@ -416,17 +416,18 @@ public class TournamentFileManager {
         File rightChild = new File(NODE_DIRECTORY + String.format(RANGE_PATTERN, middle, end));
 
         TournamentTreeNodeUtil node = new TournamentTreeNodeUtil(file);
-        if (file.exists()) {
-            node.readFromFile();
-            IONodeReadCount++;
-            isLeaf = true;
-        } else if(!leftChild.exists() && !rightChild.exists()){
+//        if (file.exists()) {
+//            node.readFromFile();
+//            IONodeReadCount++;
+//            isLeaf = true;
+//        }
+        if(!leftChild.exists() && !rightChild.exists()){
             isLeaf = true;
         } else{
             isLeaf = false;
         }
 
-        return new Pair<>(node, isLeaf);
+        return new Pair<>(node, !isLeaf);
 
     }
 
@@ -439,16 +440,18 @@ public class TournamentFileManager {
         File rightChild = new File(EDGE_DIRECTORY + String.format(RANGE_PATTERN, middle, end));
 
         TournamentTreeEdgeUtil edge = new TournamentTreeEdgeUtil(file);
-        if (file.exists()) {
-            edge.readFromFile();
-            IOEdgeReadCount++;
+//        if (file.exists()) {
+//            edge.readFromFile();
+//            IOEdgeReadCount++;
+//            isLeaf = true;
+//        }
+        if(!leftChild.exists() && !rightChild.exists()){
             isLeaf = true;
-        } else if(!leftChild.exists() && !rightChild.exists()){
-            isLeaf = true;
+        } else{
             isLeaf = false;
         }
 
-        return new Pair<>(edge, isLeaf);
+        return new Pair<>(edge, !isLeaf);
 
 
     }
