@@ -4,7 +4,6 @@ import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 import com.univocity.parsers.csv.CsvWriter;
 import com.univocity.parsers.csv.CsvWriterSettings;
-import javafx.util.Pair;
 import vo.OperationEdge;
 import vo.OperationEdge.OpType;
 import vo.TournamentEdge;

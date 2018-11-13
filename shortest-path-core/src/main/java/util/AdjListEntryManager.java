@@ -1,6 +1,5 @@
 package util;
 
-import com.sun.tools.javac.util.Assert;
 import vo.Neighbor;
 
 import java.io.File;
@@ -78,7 +77,6 @@ public class AdjListEntryManager {
 
         public File getBlockIdentifier(int nodeId) {
             int fileId = getMapIdInt(nodeId);
-            Assert.check(ENTRY_INDEX.containsKey(fileId), nodeId);
 
             return ENTRY_INDEX.get(fileId);
         }
@@ -100,8 +98,6 @@ public class AdjListEntryManager {
         }
 
         private int getMapIdInt(int nodeId) {
-            Assert.check(nodeId < NODE_SIZE);
-
             return nodeId / ENTRY_BLOCK_SIZE;
         }
 

@@ -13,8 +13,6 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.*;
 
-import javafx.util.Pair;
-
 public class TournamentFileManager {
 
     public static TournamentTreeNodeUtil nodeRoot;

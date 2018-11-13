@@ -4,7 +4,6 @@ import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 import com.univocity.parsers.csv.CsvWriter;
 import com.univocity.parsers.csv.CsvWriterSettings;
-import sun.jvm.hotspot.utilities.Assert;
 import vo.OperationNode;
 import vo.TournamentNode;
 import vo.OperationNode.OpType;

@@ -1,6 +1,6 @@
 package sssp;
 
-import javafx.util.Pair;
+import util.Pair;
 import util.AdjListEntryManager;
 import util.TournamentFileManager;
 import vo.Neighbor;
@@ -13,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class CacheEfficientDijkstra {
@@ -24,7 +23,7 @@ public class CacheEfficientDijkstra {
     public CacheEfficientDijkstra() throws Exception {
         TournamentFileManager.initialize();
         adjListManager = new AdjListEntryManager();
-        String path = "./map-data/result/cache-eff.txt";
+        String path = "./map-data/result/cache-eff-1.txt";
         Path pathToFile = Paths.get(path);
         if(!Files.exists(pathToFile)) {
             Files.createDirectories(pathToFile.getParent());
@@ -61,7 +60,7 @@ public class CacheEfficientDijkstra {
             resultCount++;
             if(result.size() % 200 == 0) {
                 System.out.println("Count: " + resultCount + ", Time Pass: " + (System.currentTimeMillis() - start));
-                if (result.size() == 4400) {
+                if (result.size() == 200) {
                     break;
                 }
             }

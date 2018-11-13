@@ -14,9 +14,8 @@ public class DijkstraTest {
     @Test
     public void testNormalDijkstra() throws Exception {
         NormalDijkstra process = new NormalDijkstra();
-        process.dijkstra(2, 2641782);
+        process.dijkstra(2, 100000);
     }
-
     @Test
     public void testInMemoryDijkstra() throws Exception {
         InMemoryDijkstra process = new InMemoryDijkstra();
