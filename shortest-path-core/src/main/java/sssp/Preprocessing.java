@@ -6,10 +6,12 @@ import util.EdgeUtil;
 //import util.GraphUtil;
 import util.GraphUtil;
 import util.NodeUtil;
+import util.Pair;
 import vo.Neighbor;
 
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class Preprocessing {
@@ -49,24 +51,26 @@ public class Preprocessing {
     private void prepareEdgeList() throws Exception {
         EdgeUtil edgeUtil = new EdgeUtil();
         String edgeCSV =  "./map-data/graph/sin/edge.csv";
-//        String edgeStoreCSV = "./map-data/sorted-graph/sin/edge.csv";
+        String edgeStoreCSV = "./map-data/sorted-graph/sin/edge.csv";
 
         CSVReader reader = new CSVReader(new FileReader(edgeCSV));
         reader.readNext();
         System.out.println("Start");
         String [] lines; //skip header
+        HashSet<Pair<Integer, Integer>> hashSet = new HashSet<>();
         while ((lines = reader.readNext()) != null) {
-//            int from = Integer.valueOf(lines[0]);
-//            int to = Integer.valueOf(lines[1]);
-//            double dist = Double.valueOf(lines[2]);
-
-            edgeUtil.addEdge(0, 0, 0);
-//            edgeUtil.addEdge(from, to, dist);
-//            edgeUtil.addEdge(to, from, dist);
+            int from = Integer.valueOf(lines[0]);
+            int to = Integer.valueOf(lines[1]);
+            double dist = Double.valueOf(lines[2]);
+            if(!hashSet.contains(new Pair<>(from, to)) && from != to) {
+                edgeUtil.addEdge(from, to, dist);
+                edgeUtil.addEdge(to, from, dist);
+                hashSet.add(new Pair<>(from, to));
+            }
         }
-//        edgeUtil.sort();
+        edgeUtil.sort();
         System.out.println(edgeUtil.getEdgeSize());
-//        edgeUtil.storeToCSV(edgeStoreCSV);
+        edgeUtil.storeToCSV(edgeStoreCSV);
     }
 
     private void parseOSMMap() {
