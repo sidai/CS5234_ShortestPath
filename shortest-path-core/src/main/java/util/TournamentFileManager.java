@@ -409,18 +409,25 @@ public class TournamentFileManager {
 
     private static Pair<TournamentTreeNodeUtil, Boolean> getChildTreeNode(int start, int end) throws Exception{
         File file = new File(NODE_DIRECTORY + String.format(RANGE_PATTERN, start, end));
-        boolean exist;
+        boolean isLeaf;
+
+        int middle = (start + end)/2;
+        File leftChild = new File(NODE_DIRECTORY + String.format(RANGE_PATTERN, start, middle));
+        File rightChild = new File(NODE_DIRECTORY + String.format(RANGE_PATTERN, middle, end));
 
         TournamentTreeNodeUtil node = new TournamentTreeNodeUtil(file);
         if (file.exists()) {
             node.readFromFile();
             IONodeReadCount++;
-            exist = true;
-        } else {
-            exist = false;
+            isLeaf = true;
+        } else if(!leftChild.exists() && !rightChild.exists()){
+            isLeaf = true;
+        } else{
+            isLeaf = false;
         }
 
-        return new Pair<>(node, exist);
+        return new Pair<>(node, isLeaf);
+
     }
 
     private static Pair<TournamentTreeEdgeUtil, Boolean> getChildTreeEdge(int start, int end) throws Exception{
