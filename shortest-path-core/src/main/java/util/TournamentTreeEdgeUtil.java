@@ -33,7 +33,16 @@ public class TournamentTreeEdgeUtil {
 
     public TournamentTreeEdgeUtil(File file) {
         this.file = file;
-        minElements = new PriorityQueue<>();
+        minElements = new PriorityQueue<>(new Comparator<TournamentEdge>() {
+            @Override
+            public int compare(TournamentEdge o1, TournamentEdge o2) {
+                if (o1.getDist() < o2.getDist())
+                    return -1;
+                if (o1.getDist() > o2.getDist())
+                    return 1;
+                return 0;
+            }
+        });
         maxElements = new PriorityQueue<>(new Comparator<TournamentEdge>() {
             @Override
             public int compare(TournamentEdge o1, TournamentEdge o2) {
@@ -115,7 +124,8 @@ public class TournamentTreeEdgeUtil {
             } else if (OpType.UPDATE.equals(op.getOperation())) {
                 TournamentEdge edge = elementsRef.get(key);
                 if (edge.getDist() > op.getValue()) {
-                    edge.setDist(op.getValue());
+                    removeElement(key);
+                    addElement(op.getFromNode(), op.getToNode(), op.getValue());
                 }
             }
         } else {
@@ -151,7 +161,8 @@ public class TournamentTreeEdgeUtil {
         if (elementsRef.containsKey(key)) {
             TournamentEdge duplicate = elementsRef.get(key);
             if(duplicate.getDist() > dist) {
-                duplicate.setDist(dist);
+                removeElement(key);
+                addElement(fromNode, toNode, dist);
             }
             // in other case discards the operation since it is larger
         }

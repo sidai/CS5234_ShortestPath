@@ -12,7 +12,7 @@ public class DijkstraTest {
         AdjListManager.loadFromFile(edgeCSV);
         test.testDijkstra();
 //        test.testInMemoryDijkstra();
-        test.testNormalDijkstra();
+//        test.testNormalDijkstra();
     }
 
     public void testDijkstra() throws Exception {
@@ -31,7 +31,7 @@ public class DijkstraTest {
         reportPoitns.add(5000);
         reportPoitns.add(10000);
         NormalDijkstra process = new NormalDijkstra();
-        process.dijkstra(2, 100000, false, reportPoitns);
+        process.dijkstra(2, 100, false, reportPoitns);
     }
 
     public void testInMemoryDijkstra() throws Exception {
@@ -40,7 +40,7 @@ public class DijkstraTest {
         reportPoitns.add(5000);
         reportPoitns.add(10000);
         InMemoryDijkstra process = new InMemoryDijkstra();
-        process.dijkstra(2, 100000, false, reportPoitns);
+        process.dijkstra(2, 100, false, reportPoitns);
     }
 }
 

@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,16 @@ public class InMemoryDijkstra {
     }
 
     public void dijkstra(int src, int dest, boolean isDest, List<Integer> reportPoints) throws Exception {
-        PriorityQueue<TournamentNode> nodeQueue = new PriorityQueue<>();
+        PriorityQueue<TournamentNode> nodeQueue = new PriorityQueue<>(new Comparator<TournamentNode>() {
+            @Override
+            public int compare(TournamentNode o1, TournamentNode o2) {
+                if (o1.getDist() < o2.getDist())
+                    return -1;
+                if (o1.getDist() > o2.getDist())
+                    return 1;
+                return 0;
+            }
+        });
         // maintain the current optimal cost of unsettled nodes
         Map<Integer, Double> costMap = new HashMap<>();
         boolean[] added = new boolean[NODE_SIZE];

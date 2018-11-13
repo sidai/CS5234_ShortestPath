@@ -6,7 +6,7 @@ import com.univocity.parsers.annotations.Parsed;
 import java.util.Arrays;
 
 @Headers(sequence = {"from_node", "to_node", "dist"})
-public class TournamentEdge implements Comparable<TournamentEdge> {
+public class TournamentEdge {
     @Parsed(field = "from_node")
     private int fromNode;
 
@@ -25,16 +25,6 @@ public class TournamentEdge implements Comparable<TournamentEdge> {
         this.fromNode = fromNode;
         this.toNode = toNode;
         this.dist = dist;
-    }
-
-    @Override
-    public int compareTo(TournamentEdge other)
-    {
-        if (this.dist < other.getDist())
-            return -1;
-        if (this.dist > other.getDist())
-            return 1;
-        return 0;
     }
 
     @Override
