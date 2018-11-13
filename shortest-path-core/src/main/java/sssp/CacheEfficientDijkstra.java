@@ -1,7 +1,7 @@
 package sssp;
 
+import util.AdjListManager;
 import util.Pair;
-import util.AdjListEntryManager;
 import util.TournamentFileManager;
 import vo.Neighbor;
 import vo.TournamentNode;
@@ -16,14 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CacheEfficientDijkstra {
-    AdjListEntryManager adjListManager;
     PrintWriter pr;
     long start = System.currentTimeMillis();
 
     public CacheEfficientDijkstra() throws Exception {
         TournamentFileManager.initialize();
-        adjListManager = new AdjListEntryManager();
-        String path = "./map-data/result/cache-eff-1.txt";
+        String path = "./map-data/result/cache-eff.txt";
         Path pathToFile = Paths.get(path);
         if(!Files.exists(pathToFile)) {
             Files.createDirectories(pathToFile.getParent());
@@ -39,7 +37,6 @@ public class CacheEfficientDijkstra {
         TournamentFileManager.updateDistance(src, src, currentDistance);
 
         List<Pair> result = new ArrayList<>();
-        int resultCount = 0;
         while (true) {
             TournamentNode nextNode = TournamentFileManager.extractMinNode();
             if (nextNode == null) {
@@ -52,27 +49,24 @@ public class CacheEfficientDijkstra {
             if (src == dest && isDest) {
                 break;
             }
-            List<Neighbor> neighbors = adjListManager.readAdjListEntry(src);
+            List<Neighbor> neighbors = AdjListManager.readAdjListEntry(src);
 
             for (Neighbor neighbor : neighbors) {
                 TournamentFileManager.updateDistance(src, neighbor.getId(), currentDistance + neighbor.getDistance());
             }
-            resultCount++;
-            if(reportPoints.contains(resultCount)) {
-                System.out.println("report at "+resultCount+"----------------------------------------");
+            if(reportPoints.contains(result.size())) {
+                System.out.println("report at "+result.size()+"----------------------------------------");
                 System.out.println("Time Pass: " + (System.currentTimeMillis() - start));
                 System.out.println("Edge Priority Queue Read:"+TournamentFileManager.IOEdgeReadCount+" Edge Priority Queue Write:"+TournamentFileManager.IOEdgeWriteCount);
                 System.out.println("Node Priority Queue Read:"+TournamentFileManager.IONodeReadCount+" Node Priority Queue Write:"+TournamentFileManager.IONodeWriteCount);
-
-
             }
             if (result.size() == dest && !isDest) {
                 break;
             }
         }
-        printNode();
+//        printNode();
         pr.println("-----------------------------------------------------------------------------------------");
-        pr.println("Result count: " + resultCount);
+        pr.println("Result count: " + result.size());
         pr.println("Node Operation: " + TournamentFileManager.nodePopCount + " " + TournamentFileManager.nodeUpdateCount + " " + TournamentFileManager.nodeDeleteCount);
         pr.println("Edge Operation: " + TournamentFileManager.edgePopCount + " " + TournamentFileManager.edgeUpdateCount + " " + TournamentFileManager.edgeDeleteCount);
         pr.println("Priority Queue Read:"+TournamentFileManager.IOEdgeReadCount+" Priority Queue Write:"+TournamentFileManager.IOEdgeWriteCount);
