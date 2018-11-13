@@ -1,6 +1,5 @@
 package sssp;
 
-import util.AdjListEntryManager;
 import util.AdjListManager;
 import vo.Neighbor;
 import vo.TournamentNode;
@@ -20,7 +19,6 @@ import java.util.PriorityQueue;
 
 public class InMemoryDijkstra {
     PrintWriter pr;
-    long start = System.currentTimeMillis();
     private static int NODE_SIZE = 2675656;
     public static int updateCount = 0;
     public static int popCount = 0;
@@ -36,6 +34,7 @@ public class InMemoryDijkstra {
     }
 
     public void dijkstra(int src, int dest, boolean isDest, List<Integer> reportPoints) throws Exception {
+        long start = System.currentTimeMillis();
         PriorityQueue<TournamentNode> nodeQueue = new PriorityQueue<>(new Comparator<TournamentNode>() {
             @Override
             public int compare(TournamentNode o1, TournamentNode o2) {
@@ -92,6 +91,17 @@ public class InMemoryDijkstra {
                         costMap.put(node, newDist);
                     }
                 }
+            }
+
+            if(reportPoints.contains(result.size())) {
+                pr.println("report at "+result.size()+"----------------------------------------");
+                pr.println("Time Pass: " + (System.currentTimeMillis() - start));
+                pr.println("Priority Queue Pop: " + popCount + " Priority Queue Update: " + updateCount);
+            }
+
+            if (result.size() % 1000 == 0) {
+                System.out.println("report at "+result.size()+"----------------------------------------");
+                System.out.println("Time Pass: " + (System.currentTimeMillis() - start));
             }
         }
         pr.println("-----------------------------------------------------------------------------------------");

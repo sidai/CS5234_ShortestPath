@@ -18,8 +18,6 @@ import util.Pair;
 
 
 public class NormalDijkstra {
-
-    long start = System.currentTimeMillis();
     PrintWriter pr;
     ExternalResult result;
     ExternalPriorityQueue pq;
@@ -37,7 +35,7 @@ public class NormalDijkstra {
 
     public void dijkstra(int src, int dest, boolean isDest, List<Integer> reportPoints) throws Exception
     {
-
+        long start = System.currentTimeMillis();
         List<Pair<Integer, Double>> resultInMemory = new LinkedList<>();
         result.clearAll();
         pq.clearAll();
@@ -93,14 +91,19 @@ public class NormalDijkstra {
 //                pr.println("Result Read:"+result.IOReadCount+" Result Write:"+result.IOWriteCount);
 //                pr.println(pq.popTime+" "+pq.insertTime +" "+pq.updateTime+" "+pq.retrieveTime);
 //                pr.println(result.insertTime+" "+result.retrieveTime);
-                System.out.println("report at "+result.resultCount+"----------------------------------------");
-                System.out.println("Time Pass: " + (System.currentTimeMillis() - start));
-                System.out.println("Priority Queue Read:"+pq.IOReadCount+" Priority Queue Write:"+pq.IOWriteCount);
-                System.out.println("Result Read:"+result.IOReadCount+" Result Write:"+result.IOWriteCount);
+                pr.println("report at "+result.resultCount+"----------------------------------------");
+                pr.println("Time Pass: " + (System.currentTimeMillis() - start));
+                pr.println("Priority Queue Read:"+pq.IOReadCount+" Priority Queue Write:"+pq.IOWriteCount);
+                pr.println("Result Read:"+result.IOReadCount+" Result Write:"+result.IOWriteCount);
 
             }
             if(result.resultCount == dest && !isDest) {
                 break;
+            }
+
+            if (result.resultCount % 1000 == 0) {
+                System.out.println("report at "+result.resultCount+"----------------------------------------");
+                System.out.println("Time Pass: " + (System.currentTimeMillis() - start));
             }
         }
         pr.println("-----------------------------------------------------------------------------------------");

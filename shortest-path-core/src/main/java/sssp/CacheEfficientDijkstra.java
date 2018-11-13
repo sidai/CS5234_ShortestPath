@@ -16,11 +16,10 @@ import java.util.List;
 
 public class CacheEfficientDijkstra {
     PrintWriter pr;
-    long start = System.currentTimeMillis();
 
     public CacheEfficientDijkstra() throws Exception {
         TournamentFileManager.initialize();
-        String path = "./map-data/result/cache-eff1.txt";
+        String path = "./map-data/result/cache-eff.txt";
         Path pathToFile = Paths.get(path);
         if(!Files.exists(pathToFile)) {
             Files.createDirectories(pathToFile.getParent());
@@ -30,6 +29,7 @@ public class CacheEfficientDijkstra {
     }
 
     public void dijkstra(int src, int dest, boolean isDest, List<Integer> reportPoints) throws Exception {
+        long start = System.currentTimeMillis();
         TournamentFileManager.clearAll();
         double currentDistance = 0.0;
 
@@ -53,13 +53,17 @@ public class CacheEfficientDijkstra {
                 TournamentFileManager.updateDistance(src, neighbor.getId(), currentDistance + neighbor.getDistance());
             }
             if(reportPoints.contains(result.size())) {
-                System.out.println("report at "+result.size()+"----------------------------------------");
-                System.out.println("Time Pass: " + (System.currentTimeMillis() - start));
-                System.out.println("Edge Priority Queue Read:"+TournamentFileManager.IOEdgeReadCount+" Edge Priority Queue Write:"+TournamentFileManager.IOEdgeWriteCount);
-                System.out.println("Node Priority Queue Read:"+TournamentFileManager.IONodeReadCount+" Node Priority Queue Write:"+TournamentFileManager.IONodeWriteCount);
+                pr.println("report at "+result.size()+"----------------------------------------");
+                pr.println("Time Pass: " + (System.currentTimeMillis() - start));
+                pr.println("Edge Priority Queue Read:"+TournamentFileManager.IOEdgeReadCount+" Edge Priority Queue Write:"+TournamentFileManager.IOEdgeWriteCount);
+                pr.println("Node Priority Queue Read:"+TournamentFileManager.IONodeReadCount+" Node Priority Queue Write:"+TournamentFileManager.IONodeWriteCount);
             }
             if (result.size() == dest && !isDest) {
                 break;
+            }
+            if (result.size() % 1000 == 0) {
+                System.out.println("report at "+result.size()+"----------------------------------------");
+                System.out.println("Time Pass: " + (System.currentTimeMillis() - start));
             }
         }
 //        printNode();

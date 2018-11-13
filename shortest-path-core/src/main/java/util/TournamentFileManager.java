@@ -78,7 +78,6 @@ public class TournamentFileManager {
 
     public static TournamentNode extractMinNode() throws Exception{
         TournamentNode minNode = nodeRoot.findMin();
-        System.out.println(minNode.getDist());
         nodePopCount++;
         TournamentEdge minEdge = edgeRoot.findMin();
         edgePopCount++;
