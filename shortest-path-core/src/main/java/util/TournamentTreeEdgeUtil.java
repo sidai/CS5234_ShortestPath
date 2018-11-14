@@ -172,6 +172,7 @@ public class TournamentTreeEdgeUtil {
                     if (minElements.size() > ConfigManager.getMemorySize()) {
                         TournamentEdge toBuffer = maxElements.peek();
                         removeElement(new Pair<>(toBuffer.getFromNode(), toBuffer.getToNode()));
+                        resetMinAmongChild();
                         bufferUpdateOp(toBuffer.getFromNode(), toBuffer.getToNode(), toBuffer.getDist());
                     }
                 } else {

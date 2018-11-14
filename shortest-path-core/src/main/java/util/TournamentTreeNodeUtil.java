@@ -54,10 +54,6 @@ public class TournamentTreeNodeUtil {
         minAmongChild = Double.MAX_VALUE;
     }
 
-    public void init() throws Exception {
-        file.createNewFile();
-    }
-
     public void destory() throws Exception {
         file.delete();
     }
@@ -83,11 +79,22 @@ public class TournamentTreeNodeUtil {
         }
     }
 
-    public void addElement(int id, double dist) {
-        TournamentNode node = new TournamentNode(id, dist);
-        elementsRef.put(id, node);
-        minElements.add(node);
-        maxElements.add(node);
+    public void addElement(int id, double dist) throws Exception {
+        if(elementsRef.containsKey(id)) {
+            TournamentNode node = elementsRef.get(id);
+            if(node.getDist() > dist) {
+                removeElement(id);
+                node = new TournamentNode(id, dist);
+                elementsRef.put(id, node);
+                minElements.add(node);
+                maxElements.add(node);
+            }
+        } else {
+            TournamentNode node = new TournamentNode(id, dist);
+            elementsRef.put(id, node);
+            minElements.add(node);
+            maxElements.add(node);
+        }
     }
 
     public void commitOp(OperationNode op) throws Exception {
@@ -116,9 +123,8 @@ public class TournamentTreeNodeUtil {
         return minElements.size()==0;
     }
 
-    public boolean addElement(TournamentNode element) {
+    public void addElement(TournamentNode element) throws Exception {
         addElement(element.getNodeId(), element.getDist());
-        return isFull();
     }
 
     public File getFile() {
@@ -157,14 +163,6 @@ public class TournamentTreeNodeUtil {
         return min;
     }
 
-    // findMin must be called before any deleteMin so that the elements is loaded.
-    public void deleteMin() throws Exception{
-        TournamentNode root = minElements.poll();
-        elementsRef.remove(root.getNodeId());
-        maxElements.remove(root);
-        bufferDeleteOp(root.getNodeId());
-    }
-
     public void updateDistance(int id, double dist) throws Exception{
         // elements contains the node, replace if dist decreases
         // in this case there is never a operation of this node in the buffer
@@ -194,6 +192,7 @@ public class TournamentTreeNodeUtil {
                             if (minElements.size() > ConfigManager.getMemorySize()) {
                                 TournamentNode toBuffer = maxElements.peek();
                                 removeElement(toBuffer.getNodeId());
+                                resetMinAmongChild();
                                 bufferUpdateOp(toBuffer.getNodeId(), toBuffer.getDist());
                             }
                         } else {
@@ -208,6 +207,7 @@ public class TournamentTreeNodeUtil {
                     if (minElements.size() > ConfigManager.getMemorySize()) {
                         TournamentNode toBuffer = maxElements.peek();
                         removeElement(toBuffer.getNodeId());
+                        resetMinAmongChild();
                         bufferUpdateOp(toBuffer.getNodeId(), toBuffer.getDist());
                     }
                 } else {

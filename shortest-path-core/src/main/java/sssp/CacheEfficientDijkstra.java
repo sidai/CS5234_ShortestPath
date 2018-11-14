@@ -19,7 +19,7 @@ public class CacheEfficientDijkstra {
 
     public CacheEfficientDijkstra() throws Exception {
         TournamentFileManager.initialize();
-        String path = "./map-data/result/cache-eff-v4-200.txt";
+        String path = "./map-data/result/cache-eff-v4-50.txt";
         Path pathToFile = Paths.get(path);
         if(!Files.exists(pathToFile)) {
             Files.createDirectories(pathToFile.getParent());
@@ -61,6 +61,7 @@ public class CacheEfficientDijkstra {
             if (result.size() == dest && !isDest) {
                 break;
             }
+
             if (result.size() % 1000 == 0) {
                 System.out.println("report at "+result.size()+"----------------------------------------");
                 System.out.println("Time Pass: " + (System.currentTimeMillis() - start));
