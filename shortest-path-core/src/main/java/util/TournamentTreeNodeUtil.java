@@ -69,10 +69,13 @@ public class TournamentTreeNodeUtil {
         }
     }
 
-    public void removeElement(int id) {
+    public void removeElement(int id) throws Exception {
         TournamentNode node = elementsRef.remove(id);
         minElements.remove(node);
         maxElements.remove(node);
+        if (minElements.isEmpty()) {
+            TournamentFileManager.fillup(this);
+        }
     }
 
     public void addElement(int id, double dist) {
@@ -133,10 +136,11 @@ public class TournamentTreeNodeUtil {
         return buffer;
     }
 
+    public void resetBuffer() {
+        buffer = new HashMap<>();
+    }
+
     public TournamentNode findMin() throws Exception{
-        if (minElements.isEmpty()) {
-            TournamentFileManager.fillup(this);
-        }
         return minElements.isEmpty() ? null : minElements.peek();
     }
 
