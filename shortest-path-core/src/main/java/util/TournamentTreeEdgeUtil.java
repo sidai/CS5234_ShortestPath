@@ -136,11 +136,7 @@ public class TournamentTreeEdgeUtil {
             if (OpType.DELETE.equals(op.getOperation())) {
                 removeElement(key);
             } else if (OpType.UPDATE.equals(op.getOperation())) {
-                TournamentEdge edge = elementsRef.get(key);
-                if (edge.getDist() > op.getValue()) {
-                    removeElement(key);
-                    addElement(op.getFromNode(), op.getToNode(), op.getValue());
-                }
+                throw new RuntimeException("We never update a edge twice");
             }
         } else {
             if (OpType.UPDATE.equals(op.getOperation())) {
@@ -162,51 +158,20 @@ public class TournamentTreeEdgeUtil {
     }
 
     public void updateDistance(int fromNode, int toNode, double dist) throws Exception{
-        // elements contains the node, replace if dist decreases
-        // in this case there is never a operation of this node in the buffer
+        // we never update an edge twice
         Pair<Integer, Integer> key = new Pair<>(fromNode, toNode);
         if (elementsRef.containsKey(key)) {
-            System.out.println("Fail " + key.getKey() +", " + key.getValue());
-            TournamentEdge duplicate = elementsRef.get(key);
-//            System.exit(1);
-            if(duplicate.getDist() > dist) {
-                removeElement(key);
-                addElement(fromNode, toNode, dist);
-            }
-            // in other case discards the operation since it is larger
-        }
-
-        //elements doesn't contain the node, check if need to insert into elements.
-        else {
+//            throw new RuntimeException("We never update an edge twice");
+        } else {
             if (buffer.containsKey(key)) {
-                OperationEdge node = buffer.get(key);
-                //ignore since it has been removed.
-                if (OpType.DELETE.equals(node.getOperation())) {
-                    return;
-                } else {
-                    //need to update value
-                    if(node.getValue() > dist) {
-                        //directly insert and discard the old update
-                        if (dist < minAmongChild) {
-                            buffer.remove(key);
-                            addElement(fromNode, toNode, dist);
-                            if (minElements.size() > ConfigManager.getMemorySize()) {
-                                TournamentEdge toBuffer = maxElements.peek();
-                                removeElement(key);
-                                bufferUpdateOp(toBuffer.getFromNode(), toBuffer.getToNode(), toBuffer.getDist());
-                            }
-                        } else {
-                            node.setValue(dist);
-                        }
-                    }
-                    // in other case discards the operation since it is larger
-                }
+//                throw new RuntimeException("We never update an edge after an early update or delete");
             } else {
-                if (minAmongChild >= dist) {
+                if(dist < minAmongChild) {
+                    //directly inserted into elements list
                     addElement(fromNode, toNode, dist);
                     if (minElements.size() > ConfigManager.getMemorySize()) {
                         TournamentEdge toBuffer = maxElements.peek();
-                        removeElement(key);
+                        removeElement(new Pair<>(toBuffer.getFromNode(), toBuffer.getToNode()));
                         bufferUpdateOp(toBuffer.getFromNode(), toBuffer.getToNode(), toBuffer.getDist());
                     }
                 } else {
