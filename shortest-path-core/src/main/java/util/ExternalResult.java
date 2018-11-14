@@ -109,7 +109,6 @@ public class ExternalResult {
         for(int i=0; i<nodes.size(); i++){
             ResultNode cur = nodes.get(i);
             if(cur.getNodeId() > node.getNodeId()){
-               // System.out.println("\nresult compare node id "+cur.getNodeId()+" "+node.getNodeId());
                 insertIndex = i;
                 break;
             }
@@ -118,10 +117,6 @@ public class ExternalResult {
             insertIndex = nodes.size();
         }
         nodes.add(insertIndex,node);
-//        System.out.println("insert to file");
-//        for(int i = 0; i < nodes.size(); i++) {
-//            System.out.println(nodes.get(i).getNodeId());
-//        }
 
         storeToFile(file,nodes);
     }

@@ -174,14 +174,14 @@ public class TournamentFileManager {
             leftChild.destory();
         } else  {
             leftChild.storeToFile();
-            IOEdgeWriteCount += 1;
+            IONodeWriteCount += 1;
         }
 
         if(rightChild.isEmpty()) {
             rightChild.destory();
         } else  {
             rightChild.storeToFile();
-            IOEdgeWriteCount += 1;
+            IONodeWriteCount += 1;
         }
     }
 

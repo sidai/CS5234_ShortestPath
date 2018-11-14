@@ -85,9 +85,6 @@ public class ExternalPriorityQueue {
         if(root == null){
             throw new IllegalStateException("queue is empty");
         }else {
-//            if(nodeCount>104) {
-//                System.out.println("queue count " + nodeCount);
-//            }
             PQNode min = root;
 
             root = removeLast();
@@ -322,9 +319,6 @@ public class ExternalPriorityQueue {
             CsvParser parser = new CsvParser(parserSettings);
             parser.parse(reader);
             bufs = processor.getBeans();
-//            if(bufs.size()>0){
-//                System.out.println("new buf "+bufs.get(0).getPqIndex()+" "+ bufs.get(0).getNodeId());
-//            }
             return bufs;
         }
     }

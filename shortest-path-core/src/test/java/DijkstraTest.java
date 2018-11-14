@@ -11,7 +11,7 @@ public class DijkstraTest {
         String edgeCSV = "./map-data/sorted-graph/edge.csv";
         AdjListManager.loadFromFile(edgeCSV);
         test.testDijkstra();
-//        test.testInMemoryDijkstra();
+        test.testInMemoryDijkstra();
 
 //        test.testNormalDijkstraCache();
 //        test.testNormalDijkstra();

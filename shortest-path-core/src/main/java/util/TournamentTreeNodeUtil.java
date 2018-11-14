@@ -80,21 +80,10 @@ public class TournamentTreeNodeUtil {
     }
 
     public void addElement(int id, double dist) throws Exception {
-        if(elementsRef.containsKey(id)) {
-            TournamentNode node = elementsRef.get(id);
-            if(node.getDist() > dist) {
-                removeElement(id);
-                node = new TournamentNode(id, dist);
-                elementsRef.put(id, node);
-                minElements.add(node);
-                maxElements.add(node);
-            }
-        } else {
-            TournamentNode node = new TournamentNode(id, dist);
-            elementsRef.put(id, node);
-            minElements.add(node);
-            maxElements.add(node);
-        }
+        TournamentNode node = new TournamentNode(id, dist);
+        elementsRef.put(id, node);
+        minElements.add(node);
+        maxElements.add(node);
     }
 
     public void commitOp(OperationNode op) throws Exception {
@@ -124,7 +113,9 @@ public class TournamentTreeNodeUtil {
     }
 
     public void addElement(TournamentNode element) throws Exception {
-        addElement(element.getNodeId(), element.getDist());
+        if(!elementsRef.containsKey(element.getNodeId())) {
+            addElement(element.getNodeId(), element.getDist());
+        }
     }
 
     public File getFile() {
