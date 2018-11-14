@@ -5,6 +5,7 @@ import com.univocity.parsers.csv.CsvParserSettings;
 import com.univocity.parsers.csv.CsvWriter;
 import com.univocity.parsers.csv.CsvWriterSettings;
 import vo.OperationNode;
+import vo.TournamentEdge;
 import vo.TournamentNode;
 import vo.OperationNode.OpType;
 
@@ -55,6 +56,10 @@ public class TournamentTreeNodeUtil {
 
     public void init() throws Exception {
         file.createNewFile();
+    }
+
+    public void destory() throws Exception {
+        file.delete();
     }
 
     public void resetMinAmongChild() {
@@ -141,7 +146,15 @@ public class TournamentTreeNodeUtil {
     }
 
     public TournamentNode findMin() throws Exception{
-        return minElements.isEmpty() ? null : minElements.peek();
+        return minElements.peek();
+    }
+
+    public TournamentNode extractMin() throws Exception {
+        TournamentNode min = minElements.peek();
+        if (min != null) {
+            removeElement(min.getNodeId());
+        }
+        return min;
     }
 
     // findMin must be called before any deleteMin so that the elements is loaded.
@@ -232,6 +245,7 @@ public class TournamentTreeNodeUtil {
     }
 
     public void storeToFile() throws IOException {
+        file.createNewFile();
         try (Writer writer = new BufferedWriter((new FileWriter(file)))) {
             CsvWriterSettings settings = new CsvWriterSettings();
             settings.setQuoteAllFields(true);

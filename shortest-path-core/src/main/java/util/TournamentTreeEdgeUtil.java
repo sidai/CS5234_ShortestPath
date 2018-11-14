@@ -251,6 +251,7 @@ public class TournamentTreeEdgeUtil {
     }
 
     public void storeToFile() throws IOException {
+        file.createNewFile();
         try (Writer writer = new BufferedWriter((new FileWriter(file)))) {
             CsvWriterSettings settings = new CsvWriterSettings();
             settings.setQuoteAllFields(true);
