@@ -162,36 +162,64 @@ public class TournamentFileManager {
         return new Pair<>(leftOps, rightOps);
     }
 
-    public static void empty(TournamentTreeEdgeUtil tEdge) throws Exception {
+    public static void fillup(TournamentTreeEdgeUtil tEdge) throws Exception {
         String[] range = tEdge.getFile().getName().split("\\.")[0].split("-");
         int start = Integer.parseInt(range[0]);
         int end = Integer.parseInt(range[1]);
         int middle = (start + end)/2;
 
-        Pair<TournamentTreeEdgeUtil, Boolean> leftPair = getChildTreeEdge(start, middle);
-        TournamentTreeEdgeUtil leftChild = leftPair.getKey();
-        boolean leftCommit = (middle - start <= ConfigManager.getMemorySize()) || !leftPair.getValue();
+        TournamentTreeEdgeUtil leftChild = getChildTreeEdge(start, middle);
+        TournamentTreeEdgeUtil rightChild = getChildTreeEdge(middle, end);
 
-        Pair<TournamentTreeEdgeUtil, Boolean> rightPair = getChildTreeEdge(middle, end);
-        TournamentTreeEdgeUtil rightChild = rightPair.getKey();
-        boolean rightCommit = (end - middle <= ConfigManager.getMemorySize()) || !rightPair.getValue();
+        boolean leftIsLeaf = hasNoChild(start, middle);
+        boolean rightIsLeaf = hasNoChild(middle, end);
 
-        Pair<List<OperationEdge>, List<OperationEdge>> ops = splitEdgeOperation(tEdge.getBuffer(), middle);
-
-        List<OperationEdge> leftOps = ops.getKey();
-        if (!leftOps.isEmpty()) {
-            if (!leftPair.getValue()) {
-                leftChild.init();
+        if (tEdge.getBuffer().isEmpty()) {
+            if (leftIsLeaf && rightIsLeaf){
+                return;
             }
-            process(leftChild, leftOps, leftCommit);
+        } else {
+            //Flush operation to children
+            Pair<List<OperationEdge>, List<OperationEdge>> ops = splitEdgeOperation(tEdge.getBuffer(), middle);
+            List<OperationEdge> leftOps = ops.getKey();
+            if (!leftOps.isEmpty()) {
+                process(leftChild, leftOps, leftIsLeaf);
+            }
+
+            List<OperationEdge> rightOps = ops.getValue();
+            if (!rightOps.isEmpty()) {
+                process(rightChild, rightOps, rightIsLeaf);
+            }
+            tEdge.resetBuffer();
         }
 
-        List<OperationEdge> rightOps = ops.getValue();
-        if (!rightOps.isEmpty()) {
-            if (!rightPair.getValue()) {
-                rightChild.init();
+        //fill up until reach maximum size or no elements in children
+        while (!tEdge.isFull()){
+            TournamentEdge left = leftChild.findMin();
+            TournamentEdge right = rightChild.findMin();
+            // no more elements in children
+            if(left == null && right == null) {
+                break;
+            } else if(left == null) {
+                tEdge.addElement(rightChild.extractMin());
+            } else if(right == null) {
+                tEdge.addElement(leftChild.extractMin());
+            } else {
+                if (left.getDist() <= right.getDist()) {
+                    tEdge.addElement(leftChild.extractMin());
+                } else {
+                    tEdge.addElement(rightChild.extractMin());
+                }
             }
-            process(rightChild, rightOps, rightCommit);
+        }
+        tEdge.resetMinAmongChild();
+
+        if(leftChild.isEmpty()) {
+            leftChild.destory();
+        }
+
+        if(rightChild.isEmpty()) {
+            rightChild.destory();
         }
 
         if (leftChild.getFile().exists()) {
@@ -229,79 +257,6 @@ public class TournamentFileManager {
             }
         }
         return new Pair<>(leftOps, rightOps);
-    }
-
-    public static void fillup(TournamentTreeEdgeUtil tEdge) throws Exception{
-        String[] range = tEdge.getFile().getName().split("\\.")[0].split("-");
-        int start = Integer.parseInt(range[0]);
-        int end = Integer.parseInt(range[1]);
-        int middle = (start + end)/2;
-
-        Pair<TournamentTreeEdgeUtil, Boolean> leftPair = getChildTreeEdge(start, middle);
-        TournamentTreeEdgeUtil leftChild = leftPair.getKey();
-        boolean leftCommit = (middle - start <= ConfigManager.getMemorySize()) || !leftPair.getValue();
-
-        Pair<TournamentTreeEdgeUtil, Boolean> rightPair = getChildTreeEdge(middle, end);
-        TournamentTreeEdgeUtil rightChild = rightPair.getKey();
-        boolean rightCommit = (end - middle <= ConfigManager.getMemorySize()) || !rightPair.getValue();
-
-        Pair<List<OperationEdge>, List<OperationEdge>> ops = splitEdgeOperation(tEdge.getBuffer(), middle);
-
-        List<OperationEdge> leftOps = ops.getKey();
-        if (!leftOps.isEmpty()) {
-            process(leftChild, leftOps, leftCommit);
-            // there is new element, init the file if it does not exist.
-            if (!leftPair.getValue() && !leftChild.isEmpty()) {
-                leftChild.init();
-            }
-        }
-
-        List<OperationEdge> rightOps = ops.getValue();
-        if (!rightOps.isEmpty()) {
-            process(rightChild, rightOps, rightCommit);
-            if (!rightPair.getValue() && !rightChild.isEmpty()) {
-                rightChild.init();
-            }
-        }
-
-        boolean isNotFull = true;
-
-        while (isNotFull){
-            TournamentEdge left = leftChild.findMin();
-            TournamentEdge right = rightChild.findMin();
-            // no more elements in children
-            if(left == null && right == null) {
-                break;
-            } else if(left == null) {
-                isNotFull = tEdge.addElement(rightChild.extractMin());
-            } else if(right == null) {
-                isNotFull = tEdge.addElement(leftChild.extractMin());
-            } else {
-                if (left.getDist() <= right.getDist()) {
-                    isNotFull = tEdge.addElement(leftChild.extractMin());
-                } else {
-                    isNotFull = tEdge.addElement(rightChild.extractMin());
-                }
-            }
-        }
-
-        if(leftChild.isEmpty()) {
-            leftChild.destory();
-        }
-
-        if(rightChild.isEmpty()) {
-            rightChild.destory();
-        }
-
-        tEdge.resetMinAmongChild();
-        if (leftChild.getFile().exists()) {
-            leftChild.storeToFile();
-            IOEdgeWriteCount += 1;
-        }
-        if (rightChild.getFile().exists()) {
-            rightChild.storeToFile();
-            IOEdgeWriteCount += 1;
-        }
     }
 
     public static void fillup(TournamentTreeNodeUtil tNode) throws Exception{
@@ -409,26 +364,23 @@ public class TournamentFileManager {
 
     }
 
-    private static Pair<TournamentTreeEdgeUtil, Boolean> getChildTreeEdge(int start, int end) throws Exception{
+    private static TournamentTreeEdgeUtil getChildTreeEdge(int start, int end) throws Exception{
         File file = new File(EDGE_DIRECTORY + String.format(RANGE_PATTERN, start, end));
-        boolean isLeaf;
-
-        int middle = (start + end)/2;
-        File leftChild = new File(EDGE_DIRECTORY + String.format(RANGE_PATTERN, start, middle));
-        File rightChild = new File(EDGE_DIRECTORY + String.format(RANGE_PATTERN, middle, end));
 
         TournamentTreeEdgeUtil edge = new TournamentTreeEdgeUtil(file);
         if (file.exists()) {
             edge.readFromFile();
             IOEdgeReadCount++;
-            isLeaf = true;
-        } else if(!leftChild.exists() && !rightChild.exists()){
-            isLeaf = true;
-            isLeaf = false;
         }
 
-        return new Pair<>(edge, isLeaf);
+        return edge;
+    }
 
+    private static boolean hasNoChild(int start, int end) {
+        int middle = (start+end)/2;
+        File leftChild = new File(EDGE_DIRECTORY + String.format(RANGE_PATTERN, start, middle));
+        File rightChild = new File(EDGE_DIRECTORY + String.format(RANGE_PATTERN, middle, end));
 
+        return !leftChild.exists() && !rightChild.exists();
     }
 }

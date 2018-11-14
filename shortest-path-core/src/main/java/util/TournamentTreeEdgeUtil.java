@@ -75,13 +75,16 @@ public class TournamentTreeEdgeUtil {
     }
 
     public boolean isEmpty(){
-        return minElements.size() == 0;
+        return minElements.isEmpty() && buffer.isEmpty();
     }
 
     public void removeElement(Pair<Integer, Integer> key) throws Exception {
         TournamentEdge edge = elementsRef.remove(key);
         minElements.remove(edge);
         maxElements.remove(edge);
+        if (minElements.isEmpty()) {
+            TournamentFileManager.fillup(this);
+        }
     }
 
     public void addElement(int fromNode, int toNode, double dist) {
@@ -91,9 +94,8 @@ public class TournamentTreeEdgeUtil {
         maxElements.add(edge);
     }
 
-    public boolean addElement(TournamentEdge element){
+    public void addElement(TournamentEdge element){
         addElement(element.getFromNode(), element.getToNode(), element.getDist());
-        return isFull();
     }
 
     public File getFile() {
@@ -114,6 +116,10 @@ public class TournamentTreeEdgeUtil {
 
     public Map<Pair<Integer, Integer>, OperationEdge> getBuffer() {
         return buffer;
+    }
+
+    public void resetBuffer() {
+        buffer = new HashMap<>();
     }
 
     public void executeOp(OperationEdge op) throws Exception {
@@ -144,9 +150,6 @@ public class TournamentTreeEdgeUtil {
     }
 
     public TournamentEdge findMin() throws Exception{
-        if (minElements.isEmpty()) {
-            TournamentFileManager.fillup(this);
-        }
         return minElements.peek();
     }
 
