@@ -39,6 +39,7 @@ public class ExternalPriorityQueue {
     private int bufEnd = -1;
     private List<PQNode> bufs = new ArrayList<>();
     private boolean cacheEnabled = false;
+    private boolean dirty = false;
 
     public ExternalPriorityQueue(boolean cacheEnabled) throws Exception {
         Path pathToDirectory = Paths.get(DIRECTORY);
@@ -292,7 +293,7 @@ public class ExternalPriorityQueue {
         if(cacheEnabled) {
             if (bufStart <= pdIndex && bufEnd > pdIndex) {
                 return bufs;
-            } else {
+            } else if(dirty){
                 File file = new File(DIRECTORY + String.format(NAME_PATTERN, bufStart, bufEnd));
                 storeToFile(file, bufs, true);
             }
@@ -325,6 +326,7 @@ public class ExternalPriorityQueue {
 
     public void storeToFile(File file, List<PQNode> pqNodes, boolean force) throws Exception {
         bufs = pqNodes;
+        dirty = true;
 
         if (!file.exists()) {
             file.createNewFile();
@@ -336,6 +338,7 @@ public class ExternalPriorityQueue {
         }
 
         IOWriteCount ++;
+        dirty = false;
 //        if(bufs.size()>0){
 //            System.out.println("store buf "+bufs.get(0).getPqIndex()+" "+ bufs.get(0).getNodeId());
 //        }

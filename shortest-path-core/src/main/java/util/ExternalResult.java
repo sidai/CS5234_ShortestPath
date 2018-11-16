@@ -6,6 +6,7 @@ import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 import com.univocity.parsers.csv.CsvWriter;
 import com.univocity.parsers.csv.CsvWriterSettings;
+import vo.PQNode;
 import vo.ResultNode;
 
 import java.io.*;
@@ -35,8 +36,15 @@ public class ExternalResult {
 
     private String DIRECTORY;
 
-    public ExternalResult(String directory) throws Exception {
+    private int bufStart = -1;
+    private int bufEnd = -1;
+    private List<ResultNode> bufs = new ArrayList<>();
+    private boolean cacheEnabled = false;
+    private boolean dirty = false;
+
+    public ExternalResult(String directory,boolean cacheEnabled) throws Exception {
         DIRECTORY = directory;
+        this.cacheEnabled = cacheEnabled;
         Path pathToDirectory = Paths.get(DIRECTORY);
         if (!Files.exists(pathToDirectory)) {
             Files.createDirectories(pathToDirectory);
@@ -88,9 +96,7 @@ public class ExternalResult {
 
 
     private List<ResultNode> retrieveWholeFile(int nodeId) throws Exception{
-        int fileId = (nodeId)/ENTRY_BLOCK_SIZE;
-        File file = new File(DIRECTORY + getMapFileName(NAME_PATTERN, fileId));
-        return readFromFile(file);
+        return readFromFile(nodeId);
     }
 
     private void insertToFile(ResultNode node) throws Exception{
@@ -118,7 +124,7 @@ public class ExternalResult {
         }
         nodes.add(insertIndex,node);
 
-        storeToFile(file,nodes);
+        storeToFile(file,nodes, false);
     }
 
     private String getMapFileName(String pattern, int fileId) {
@@ -127,7 +133,25 @@ public class ExternalResult {
         return String.format(pattern, from, to);
     }
 
-    public List<ResultNode> readFromFile(File file) throws Exception {
+    public List<ResultNode> readFromFile(int resultIndex) throws Exception {
+        if(cacheEnabled) {
+            if (bufStart <= resultIndex && bufEnd > resultIndex) {
+                return bufs;
+            } else if(dirty){
+                File file = new File(DIRECTORY + String.format(NAME_PATTERN, bufStart, bufEnd));
+                storeToFile(file, bufs, true);
+            }
+        }
+
+        int fileId = (resultIndex)/ENTRY_BLOCK_SIZE;
+        int from = fileId * ENTRY_BLOCK_SIZE ;
+        int to = (fileId + 1) * ENTRY_BLOCK_SIZE;
+        File file = new File(DIRECTORY + getMapFileName(NAME_PATTERN, fileId));
+
+
+        bufStart=from;
+        bufEnd=to;
+
         IOReadCount++;
         if (!file.exists()) {
             file.createNewFile();
@@ -141,13 +165,26 @@ public class ExternalResult {
             CsvParser parser = new CsvParser(parserSettings);
 
             parser.parse(reader);
-            return processor.getBeans();
+            bufs = processor.getBeans();
+            return bufs;
         }
     }
 
 
-    public void storeToFile(File file, List<ResultNode> resultNodes) throws Exception {
+    public void storeToFile(File file, List<ResultNode> resultNodes, boolean force) throws Exception {
+        bufs = resultNodes;
+        dirty= true;
+
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        if(cacheEnabled){
+            if(bufs.size() < ENTRY_BLOCK_SIZE && !force){
+                return;
+            }
+        }
         IOWriteCount++;
+        dirty = false;
         if (!file.exists()) {
             file.createNewFile();
         }

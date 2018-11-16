@@ -47,7 +47,7 @@ public class NormalDijkstra {
         if(cache){
             dir = DIRECTORY_CACHE;
         }
-        result = new ExternalResult(dir);
+        result = new ExternalResult(dir, cache);
         long start = System.currentTimeMillis();
         List<Pair<Integer, Double>> resultInMemory = new LinkedList<>();
         result.clearAll();
